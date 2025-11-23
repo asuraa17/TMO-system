@@ -1,0 +1,13 @@
+<html>
+    Dashboard
+
+    Welcome, {{ user.username }}!
+    Your role: {{ role }}
+    Email: {{ user.email }}
+    
+    {% if user.role == 'tmo_officer' %}
+        Go to TMO Dashboard
+    {% endif %}
+    
+    Admin Panel
+</html>
