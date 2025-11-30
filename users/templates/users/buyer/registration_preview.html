@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .preview-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        .preview-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+        .preview-label {
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 5px;
+        }
+        .preview-value {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        .file-info {
+            color: #667eea;
+            font-style: italic;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            flex: 1;
+            text-decoration: none;
+            text-align: center;
+            display: inline-block;
+        }
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            color: #856404;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Preview your registration</h1>
+        <p class="subtitle">Please review your information before submitting</p>
+
+        <div class="warning">Please review all information carefully. Once submitted, you will need to contact support to make changes</div>
+
+        <div class="preview-section">
+            <h3>Personal Information</h3>
+            <div class="preview-label">Full Name:</div>
+            <div class="preview-value">{{ data.full_name }}</div>
+
+            <div class="preview-label">Address:</div>
+            <div class="preview-value">{{ data.address }}</div>
+
+            <div class="preview-label">Phone:</div>
+            <div class="preview-value">{{ data.phone }}</div>
+
+            <div class="preview-label">Date of Birth:</div>
+            <div class="preview-value">{{ data.dob }}</div>
+
+        </div>
+
+        <div class="preview-section">
+            <h3>Account Information</h3>
+            <div class="preview-label">Email:</div>
+            <div class="preview-value">{{ data.email }}</div>
+        </div>
+
+        <div class="preview-section">
+            <h3>Uploaded Documents</h3>
+
+            {% if files.citizenship_file %}
+            <div class="preview-label">Citizenship Document:</div>
+            <div class="preview-value">{{ files.citizenship_file }}</div>
+            {% endif %}
+
+            {% if files.nid_file %}
+            <div class="preview-label">National ID:</div>
+            <div class="preview-value">{{ files.nid_file }}</div>
+            {% endif %}
+
+            {% if files.passport_photo %}
+            <div class="preview-label">Passport Photo:</div>
+            <div class="preview-value">{{ files.passport_photo }}</div>
+            {% endif %}
+
+            {% if files.signature_image %}
+            <div class="preview-label">Signature:</div>
+            <div class="preview-value">{{ files.signature_image }}</div>
+            {% endif %}
+        </div>
+
+        <div class="button-group">
+            <a href="{% url 'users:buyer_register' %}" class="btn btn-secondary">Back to Edit</a>
+            <form method="post" action="{% url 'users:buyer_register_submit' %}" style="flex:1;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Confirm and Register</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

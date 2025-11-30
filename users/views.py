@@ -1,11 +1,25 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib import messages
+from .forms import BuyerRegistrationForm
+from .models import BuyerProfile
+from datetime import date
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+
+User = get_user_model()
 
 # Create your views here.
+
 
 def is_tmo_officer(user):
     #check if the user is a TMO Officer
     return user.is_authenticated and user.role == 'tmo_officer'
+
+def is_buyer(user):
+    #check if the user is a Buyer
+    return user.is_authenticated and user.role == 'buyer'
 
 @login_required
 def dashboard(request):
@@ -24,3 +38,162 @@ def tmo_officer(request):
         'user': request.user,
     }
     return render(request, 'users/tmo_dashboard.html', context)
+
+
+def buyer_register(request):
+    #view for buyer registration
+    if request.method == 'POST':
+        form = BuyerRegistrationForm(request.POST, request.FILES)
+        if form.is_valid():
+            #store form data in session for preview
+            #store text data only
+            request.session['registration_data'] = {
+                'full_name': form.cleaned_data['full_name'],
+                'address': form.cleaned_data['address'],
+                'phone': form.cleaned_data['phone'],
+                'dob': form.cleaned_data['dob'].isoformat(),
+                'email': form.cleaned_data['email'],
+                'password': form.cleaned_data['password'],
+            }
+            
+            # TEMPORARY FILE STORAGE
+            temp_files = {}
+            file_names = {}
+            for field in ['citizenship_file', 'nid_file', 'passport_photo', 'signature_image']:
+                file = form.cleaned_data.get(field)
+                if file:
+                    # save temp file
+                    temp_path = default_storage.save(f"temp/{file.name}", file)
+                    temp_files[field] = temp_path
+                    file_names[field] = file.name  # store name for preview
+                else:
+                    temp_files[field] = None
+                    file_names[field] = None
+
+            request.session['temp_files'] = temp_files
+            request.session['file_names'] = file_names
+
+            return redirect('users:buyer_register_preview')
+    else:
+        form = BuyerRegistrationForm()
+
+    return render(request, 'users/buyer/registration_form.html', {'form': form})
+
+def buyer_register_preview(request):
+    #preview page before final submission of buyer registration
+    registration_data = request.session.get('registration_data')
+    file_names = request.session.get('file_names')
+
+    if not registration_data:
+        messages.error(request, "No registration data found. Please fill the registration form.")
+        return redirect('users:buyer_register')
+    
+    context = {
+        'data': registration_data,
+        'files': file_names,
+    }
+    return render(request, 'users/buyer/registration_preview.html', context)
+
+
+def buyer_register_submit(request):
+
+    if request.method == 'POST':
+        registration_data = request.session.get('registration_data')
+        temp_files = request.session.get('temp_files')
+
+        if not registration_data:
+            messages.error(request, "Session expired. Please register again.")
+            return redirect('users:buyer_register')
+        
+        try:
+            #create user 
+            user = User.objects.create_user(
+                username=registration_data['email'],
+                email=registration_data['email'],
+                password=registration_data['password'],
+                role=User.Role.Buyer
+            )
+
+            #create buyer profile
+            buyer_profile = BuyerProfile.objects.create(
+                user=user,
+                full_name=registration_data['full_name'],
+                address=registration_data['address'],
+                phone=registration_data['phone'],
+                dob=date.fromisoformat(registration_data['dob']),
+            )
+
+            # MOVE FILES FROM temp/ TO buyer_docs/
+            for field, temp_path in temp_files.items():
+                if temp_path:
+                    filename = temp_path.split("/")[-1]
+                    with default_storage.open(temp_path, 'rb') as f:
+                        getattr(buyer_profile, field).save(filename, ContentFile(f.read()))
+
+            buyer_profile.save()
+
+            # remove temp files
+            for path in temp_files.values():
+                if path:
+                    default_storage.delete(path)
+
+            # clear session
+            request.session.flush()
+
+            messages.success(request, "Registration successful! You can now log in.")
+            return redirect('users:buyer_login')
+
+        except Exception as e:
+            messages.error(request, f"Error creating user: {str(e)}")
+            return redirect('users:buyer_register')
+
+    return redirect('users:buyer_register')
+
+def buyer_login(request):
+    #buyer login view
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+
+        #authenticate using email as username
+        user = authenticate(request, username=email, password=password)
+
+        if user is not None:
+            if user.role == 'buyer':
+                login(request, user)
+                messages.success(request, f"Welcome, {user.username}!")
+                return redirect('users:buyer_home')
+            else:
+                messages.error(request, "This account is not registered as a buyer.")
+
+        else:
+            messages.error(request, "Invalid email or password.")
+        
+    return render(request, 'users/buyer/login.html')
+
+def buyer_logout(request):
+    #buyer logout view
+    logout(request)
+
+    #Clear existing messages
+    list(messages.get_messages(request))  
+
+    messages.success(request, "You have been logged out.")
+    return redirect('users:buyer_login')
+
+@login_required
+@user_passes_test(is_buyer, login_url='/users/buyer/login/')
+def buyer_home(request):
+    #buyer home/dashboard view
+    try:
+        buyer_profile = request.user.buyer_profile
+    except BuyerProfile.DoesNotExist:
+        buyer_profile = None
+
+    context = {
+        'user': request.user,
+        'profile': buyer_profile,
+    }
+    return render(request, 'users/buyer/home.html', context)
+        
+
