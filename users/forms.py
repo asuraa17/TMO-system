@@ -24,7 +24,7 @@ class BuyerRegistrationForm(forms.Form):
     )
 
     phone = forms.CharField(
-        max_length=15,
+        max_length=10,
         widget=forms.TextInput(attrs={
             "placeholder":"e.g. 9800000000",
             "class":"form-control"
@@ -115,7 +115,7 @@ class BuyerRegistrationForm(forms.Form):
         phone = self.cleaned_data.get("phone")
         if not phone.isdigit():
             raise forms.ValidationError("Phone number must contain only digits")
-        if len(phone) != 15:
+        if len(phone) != 10:
             raise forms.ValidationError("Phone number must be exactly 15 digits long")
         return phone
     
