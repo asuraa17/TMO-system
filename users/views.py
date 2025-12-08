@@ -60,8 +60,9 @@ def buyer_register(request):
             }
 
             # TEMPORARY FILE STORAGE
-            temp_files = {}
-            file_names = {}
+            temp_files = request.session.get('temp_files', {})
+            file_names = request.session.get('file_names', {})
+            
             for field in [
                 "citizenship_file",
                 "nid_file",
@@ -70,20 +71,35 @@ def buyer_register(request):
             ]:
                 file = form.cleaned_data.get(field)
                 if file:
+                    if temp_files.get(field):
+                        # delete old temp file
+                        default_storage.delete(temp_files[field])
+
                     # save temp file
                     temp_path = default_storage.save(f"temp/{file.name}", file)
                     temp_files[field] = temp_path
                     file_names[field] = file.name  # store name for preview
-                else:
-                    temp_files[field] = None
-                    file_names[field] = None
 
             request.session["temp_files"] = temp_files
             request.session["file_names"] = file_names
 
             return redirect("users:buyer_register_preview")
     else:
-        form = BuyerRegistrationForm()
+        
+        registration_data = request.session.get("registration_data")
+
+        if registration_data:
+            # pre filled form 
+            form = BuyerRegistrationForm(initial={
+                "full_name": registration_data.get("full_name"),
+                "address": registration_data.get("address"),
+                "phone": registration_data.get("phone"),
+                "dob": registration_data.get("dob"),
+                "email": registration_data.get("email"),
+                # "password": registration_data.get("password"), removed for security reason
+            })       
+        else:
+            form = BuyerRegistrationForm()
 
     return render(request, "users/buyer/registration_form.html", {"form": form})
 
@@ -151,7 +167,9 @@ def buyer_register_submit(request):
                     default_storage.delete(path)
 
             # clear session
-            request.session.flush()
+            del request.session["registration_data"]
+            del request.session["temp_files"]
+            del request.session["file_names"]
 
             messages.success(request, "Registration successful! You can now log in.")
             return redirect("users:buyer_login")
