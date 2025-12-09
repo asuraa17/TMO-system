@@ -7,6 +7,10 @@ from .models import BuyerProfile
 from datetime import date
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
+import uuid
+from django.utils.text import get_valid_filename
+from django.conf import settings
+
 
 User = get_user_model()
 
@@ -48,20 +52,19 @@ def buyer_register(request):
     if request.method == "POST":
         form = BuyerRegistrationForm(request.POST, request.FILES)
         if form.is_valid():
-            # store form data in session for preview
-            # store text data only
+            # store form data in session for preview (text data only, no password)
             request.session["registration_data"] = {
                 "full_name": form.cleaned_data["full_name"],
                 "address": form.cleaned_data["address"],
                 "phone": form.cleaned_data["phone"],
                 "dob": form.cleaned_data["dob"].isoformat(),
                 "email": form.cleaned_data["email"],
-                "password": form.cleaned_data["password"],
             }
 
             # TEMPORARY FILE STORAGE
-            temp_files = {}
-            file_names = {}
+            temp_files = request.session.get("temp_files", {})
+            file_names = request.session.get("file_names", {})
+
             for field in [
                 "citizenship_file",
                 "nid_file",
@@ -70,22 +73,51 @@ def buyer_register(request):
             ]:
                 file = form.cleaned_data.get(field)
                 if file:
-                    # save temp file
-                    temp_path = default_storage.save(f"temp/{file.name}", file)
+                    if temp_files.get(field):
+                        # delete old temp file
+                        default_storage.delete(temp_files[field])
+
+                    # save temp file with safe unique filename
+                    safe_name = get_valid_filename(file.name)
+                    unique_name = f"{uuid.uuid4()}_{safe_name}"
+                    temp_path = default_storage.save(f"temp/{unique_name}", file)
+
                     temp_files[field] = temp_path
-                    file_names[field] = file.name  # store name for preview
-                else:
-                    temp_files[field] = None
-                    file_names[field] = None
+                    file_names[field] = file.name  # keep original name for preview
 
             request.session["temp_files"] = temp_files
             request.session["file_names"] = file_names
 
             return redirect("users:buyer_register_preview")
     else:
-        form = BuyerRegistrationForm()
+        registration_data = request.session.get("registration_data")
 
-    return render(request, "users/buyer/registration_form.html", {"form": form})
+        if registration_data:
+            # pre-fill form with session data
+            dob_str = registration_data.get("dob")
+            dob_obj = date.fromisoformat(dob_str) if dob_str else None
+
+            form = BuyerRegistrationForm(
+                initial={
+                    "full_name": registration_data.get("full_name"),
+                    "address": registration_data.get("address"),
+                    "phone": registration_data.get("phone"),
+                    "dob": dob_obj,
+                    "email": registration_data.get("email"),
+                    # password not stored for security reasons
+                }
+            )
+        else:
+            form = BuyerRegistrationForm()
+
+    return render(
+        request,
+        "users/buyer/registration_form.html",
+        {
+            "form": form,
+            "MEDIA_URL": settings.MEDIA_URL,  # pass MEDIA_URL to template
+        },
+    )
 
 
 def buyer_register_preview(request):
@@ -151,7 +183,9 @@ def buyer_register_submit(request):
                     default_storage.delete(path)
 
             # clear session
-            request.session.flush()
+            del request.session["registration_data"]
+            del request.session["temp_files"]
+            del request.session["file_names"]
 
             messages.success(request, "Registration successful! You can now log in.")
             return redirect("users:buyer_login")
