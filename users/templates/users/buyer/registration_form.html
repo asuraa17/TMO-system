@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,12 +11,14 @@
             padding: 0;
             box-sizing: border-box;
         }
+
         body {
             font-family: Arial, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
         }
+
         .container {
             max-width: 600px;
             margin: 0 auto;
@@ -24,23 +27,28 @@
             border-radius: 10px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
         }
+
         h1 {
             margin-bottom: 10px;
             color: #333;
         }
+
         .subtitle {
             margin-bottom: 30px;
             color: #666;
         }
+
         .form-group {
             margin-bottom: 20px;
         }
+
         label {
             display: block;
             margin-bottom: 6px;
             color: #333;
             font-weight: bold;
         }
+
         input[type="text"],
         input[type="email"],
         input[type="password"],
@@ -52,16 +60,19 @@
             border-radius: 5px;
             font-size: 16px;
         }
+
         input[type="file"] {
             width: 100%;
             padding: 8px;
             border: 1px solid #ddd;
             border-radius: 5px;
         }
+
         textarea {
             resize: vertical;
             min-height: 80px;
         }
+
         .btn {
             background-color: #667eea;
             color: white;
@@ -72,9 +83,11 @@
             font-size: 16px;
             width: 100%;
         }
+
         .btn:hover {
             background-color: #5568d3;
         }
+
         .error {
             color: red;
             background: #fee;
@@ -82,132 +95,185 @@
             border-radius: 5px;
             margin-bottom: 20px;
         }
+
         .login-link {
             margin-top: 20px;
             text-align: center;
             color: #666;
         }
+
         .login-link a {
             color: #667eea;
             text-decoration: none;
         }
+
         .required {
             color: red;
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <h1>Buyer Registration</h1>
         <p class="subtitle">Register as a buyer to manage your vehicle registration</p>
 
         {% if messages %}
-            {% for message in messages %}
-                <div class="error">{{ message }}</div>
-            {% endfor %}
+        {% for message in messages %}
+        <div class="error">{{ message }}</div>
+        {% endfor %}
         {% endif %}
 
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
 
+            <!-- Full Name -->
             <div class="form-group">
-                <label for="{{ form.full_name.id_for_label }}">{{ form.full_name.label }} <span class="required">*</span></label>
+                <label for="{{ form.full_name.id_for_label }}">{{ form.full_name.label }} <span
+                        class="required">*</span></label>
                 {{ form.full_name }}
                 {% if form.full_name.errors %}
-                    <div class="error">{{ form.full_name.errors }}</div>
+                <div class="error">{{ form.full_name.errors }}</div>
                 {% endif %}
             </div>
 
+            <!-- Address -->
             <div class="form-group">
-                <label for="{{ form.address.id_for_label }}">{{ form.address.label }} <span class="required">*</span></label>
+                <label for="{{ form.address.id_for_label }}">{{ form.address.label }} <span
+                        class="required">*</span></label>
                 {{ form.address }}
                 {% if form.address.errors %}
-                    <div class="error">{{ form.address.errors }}</div>
+                <div class="error">{{ form.address.errors }}</div>
                 {% endif %}
             </div>
 
+            <!-- Phone -->
             <div class="form-group">
-                <label for="{{ form.phone.id_for_label }}">{{ form.phone.label }} <span class="required">*</span></label>
+                <label for="{{ form.phone.id_for_label }}">{{ form.phone.label }} <span
+                        class="required">*</span></label>
                 {{ form.phone }}
                 {% if form.phone.errors %}
-                    <div class="error">{{ form.phone.errors }}</div>
+                <div class="error">{{ form.phone.errors }}</div>
                 {% endif %}
             </div>
 
+            <!-- DOB -->
             <div class="form-group">
                 <label for="{{ form.dob.id_for_label }}">{{ form.dob.label }} <span class="required">*</span></label>
                 {{ form.dob }}
                 {% if form.dob.errors %}
-                    <div class="error">{{ form.dob.errors }}</div>
+                <div class="error">{{ form.dob.errors }}</div>
                 {% endif %}
             </div>
 
+            <!-- Citizenship File -->
             <div class="form-group">
-                <label for="{{ form.citizenship_file.id_for_label }}">{{ form.citizenship_file.label }} <span class="required">*</span></label>
+                <label for="{{ form.citizenship_file.id_for_label }}">{{ form.citizenship_file.label }} <span
+                        class="required">*</span></label>
+
+                {% if request.session.file_names.citizenship_file %}
+                <p>Previously uploaded: {{ request.session.file_names.citizenship_file }}</p>
+                <img src="{{ MEDIA_URL }}{{ request.session.temp_files.citizenship_file }}" alt="Citizenship File"
+                    width="100">
+                {% endif %}
+
                 {{ form.citizenship_file }}
                 {% if form.citizenship_file.errors %}
-                    <div class="error">{{ form.citizenship_file.errors }}</div>
+                <div class="error">{{ form.citizenship_file.errors }}</div>
                 {% endif %}
             </div>
 
+            <!-- NID File -->
             <div class="form-group">
-                <label for="{{ form.nid_file.id_for_label }}">{{ form.nid_file.label }} <span class="required">*</span></label>
+                <label for="{{ form.nid_file.id_for_label }}">{{ form.nid_file.label }} <span
+                        class="required">*</span></label>
+
+                {% if request.session.file_names.nid_file %}
+                <p>Previously uploaded: {{ request.session.file_names.nid_file }}</p>
+                <img src="{{ MEDIA_URL }}{{ request.session.temp_files.nid_file }}" alt="NID File" width="100">
+                {% endif %}
+
                 {{ form.nid_file }}
                 {% if form.nid_file.errors %}
-                    <div class="error">{{ form.nid_file.errors }}</div>
+                <div class="error">{{ form.nid_file.errors }}</div>
                 {% endif %}
             </div>
 
+            <!-- Passport Photo -->
             <div class="form-group">
-                <label for="{{ form.passport_photo.id_for_label }}">{{ form.passport_photo.label }} <span class="required">*</span></label>
+                <label for="{{ form.passport_photo.id_for_label }}">{{ form.passport_photo.label }} <span
+                        class="required">*</span></label>
+
+                {% if request.session.file_names.passport_photo %}
+                <p>Previously uploaded: {{ request.session.file_names.passport_photo }}</p>
+                <img src="{{ MEDIA_URL }}{{ request.session.temp_files.passport_photo }}" alt="Passport Photo"
+                    width="100">
+                {% endif %}
+
                 {{ form.passport_photo }}
                 {% if form.passport_photo.errors %}
-                    <div class="error">{{ form.passport_photo.errors }}</div>
+                <div class="error">{{ form.passport_photo.errors }}</div>
                 {% endif %}
             </div>
 
+            <!-- Signature Image -->
             <div class="form-group">
-                <label for="{{ form.signature_image.id_for_label }}">{{ form.signature_image.label }} <span class="required">*</span></label>
+                <label for="{{ form.signature_image.id_for_label }}">{{ form.signature_image.label }} <span
+                        class="required">*</span></label>
+
+                {% if request.session.file_names.signature_image %}
+                <p>Previously uploaded: {{ request.session.file_names.signature_image }}</p>
+                <img src="{{ MEDIA_URL }}{{ request.session.temp_files.signature_image }}" alt="Signature" width="100">
+                {% endif %}
+
                 {{ form.signature_image }}
                 {% if form.signature_image.errors %}
-                    <div class="error">{{ form.signature_image.errors }}</div>
+                <div class="error">{{ form.signature_image.errors }}</div>
                 {% endif %}
             </div>
 
+            <!-- Email -->
             <div class="form-group">
-                <label for="{{ form.email.id_for_label }}">{{ form.email.label }} <span class="required">*</span></label>
+                <label for="{{ form.email.id_for_label }}">{{ form.email.label }} <span
+                        class="required">*</span></label>
                 {{ form.email }}
                 {% if form.email.errors %}
-                    <div class="error">{{ form.email.errors }}</div>
+                <div class="error">{{ form.email.errors }}</div>
                 {% endif %}
             </div>
 
+            <!-- Password -->
             <div class="form-group">
-                <label for="{{ form.password.id_for_label }}">{{ form.password.label }} <span class="required">*</span></label>
+                <label for="{{ form.password.id_for_label }}">{{ form.password.label }} <span
+                        class="required">*</span></label>
                 {{ form.password }}
                 {% if form.password.errors %}
-                    <div class="error">{{ form.password.errors }}</div>
+                <div class="error">{{ form.password.errors }}</div>
                 {% endif %}
             </div>
 
+            <!-- Confirm Password -->
             <div class="form-group">
-                <label for="{{ form.confirm_password.id_for_label }}">{{ form.confirm_password.label }} <span class="required">*</span></label>
+                <label for="{{ form.confirm_password.id_for_label }}">{{ form.confirm_password.label }} <span
+                        class="required">*</span></label>
                 {{ form.confirm_password }}
                 {% if form.confirm_password.errors %}
-                    <div class="error">{{ form.confirm_password.errors }}</div>
+                <div class="error">{{ form.confirm_password.errors }}</div>
                 {% endif %}
             </div>
-            
+
             {% if form.non_field_errors %}
-                <div class="error">{{ form.non_field_errors }}</div>
+            <div class="error">{{ form.non_field_errors }}</div>
             {% endif %}
 
             <button type="submit" class="btn">Continue to Preview</button>
 
         </form>
 
+
         <div class="login-link">
             Already have an account? <a href="{% url 'users:buyer_login' %}">Login here</a>
         </div>
     </div>
+
 </html>
