@@ -59,6 +59,7 @@ def buyer_register(request):
                 "phone": form.cleaned_data["phone"],
                 "dob": form.cleaned_data["dob"].isoformat(),
                 "email": form.cleaned_data["email"],
+                "password": form.cleaned_data["password"],
             }
 
             # TEMPORARY FILE STORAGE
