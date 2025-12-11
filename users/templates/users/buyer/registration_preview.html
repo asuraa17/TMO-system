@@ -57,6 +57,34 @@
             color: #667eea;
             font-style: italic;
         }
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            color: #333;
+            font-weight: bold;
+        }
+        input[type="password"]
+        {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .required {
+            color: red;
+        }
+        .error {
+            color: red;
+            background: #fee;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
         .button-group {
             display: flex;
             gap: 10px;
@@ -104,6 +132,16 @@
 
         <div class="warning">Please review all information carefully. Once submitted, you will need to contact support to make changes</div>
 
+        {% if messages %}
+            {% for message in messages %}
+                <div class="error">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
+
         <div class="preview-section">
             <h3>Personal Information</h3>
             <div class="preview-label">Full Name:</div>
@@ -150,13 +188,28 @@
             {% endif %}
         </div>
 
-        <div class="button-group">
-            <a href="{% url 'users:buyer_register' %}" class="btn btn-secondary">Back to Edit</a>
-            <form method="post" action="{% url 'users:buyer_register_submit' %}" style="flex:1;">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-primary" style="width: 100%;">Confirm and Register</button>
-            </form>
-        </div>
+        <form method="post" action="{% url 'users:buyer_register_submit' %}">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="password">Password
+                    <span class="required">*</span>
+                </label>
+                <input type="password" name="password" id="password" placeholder="Enter your password" class="form-control" style="width: 100%; padding: 10px; margin-top: 5px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px;" required>
+            </div>
+
+            <div class="form-group">
+                <label for="confirm_password">Confirm password
+                    <span class="required">*</span>        
+                </label>
+                <input type="password" name="confirm_password" id="confirm_password" placeholder="Re-enter your password" class="form-control" style="width: 100%; padding: 10px; margin-top: 5px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px;" required>
+            </div>
+
+            <div class="button-group">
+                <a href="{% url 'users:buyer_register' %}" class="btn btn-secondary">Back to Edit</a>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Confirm and Register</button>        
+            </div>
+        </form>
     </div>
 </body>
 </html>
