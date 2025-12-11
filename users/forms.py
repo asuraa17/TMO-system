@@ -67,19 +67,6 @@ class BuyerRegistrationForm(forms.Form):
         )
     )
 
-    password = forms.CharField(
-        widget=forms.PasswordInput(
-            attrs={"placeholder": "Password", "class": "form-control"}
-        )
-    )
-
-    confirm_password = forms.CharField(
-        label="Confirm Password",
-        widget=forms.PasswordInput(
-            attrs={"placeholder": "Confirm Password", "class": "form-control"}
-        ),
-    )
-
     def clean_email(self):
         email = self.cleaned_data.get("email")
         if User.objects.filter(email=email).exists():
@@ -91,14 +78,6 @@ class BuyerRegistrationForm(forms.Form):
         if not phone.isdigit():
             raise forms.ValidationError("Phone number must contain only digits")
         if len(phone) != 10:
-            raise forms.ValidationError("Phone number must be exactly 15 digits long")
+            raise forms.ValidationError("Phone number must be exactly 10 digits long")
         return phone
 
-    def clean(self):
-        cleaned_data = super().clean()
-        password = cleaned_data.get("password")
-        confirm_password = cleaned_data.get("confirm_password")
-
-        if password and confirm_password and password != confirm_password:
-            raise forms.ValidationError("Password and Confirm Password do not match")
-        return cleaned_data

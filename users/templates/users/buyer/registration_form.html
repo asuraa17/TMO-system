@@ -242,26 +242,6 @@
                 {% endif %}
             </div>
 
-            <!-- Password -->
-            <div class="form-group">
-                <label for="{{ form.password.id_for_label }}">{{ form.password.label }} <span
-                        class="required">*</span></label>
-                {{ form.password }}
-                {% if form.password.errors %}
-                <div class="error">{{ form.password.errors }}</div>
-                {% endif %}
-            </div>
-
-            <!-- Confirm Password -->
-            <div class="form-group">
-                <label for="{{ form.confirm_password.id_for_label }}">{{ form.confirm_password.label }} <span
-                        class="required">*</span></label>
-                {{ form.confirm_password }}
-                {% if form.confirm_password.errors %}
-                <div class="error">{{ form.confirm_password.errors }}</div>
-                {% endif %}
-            </div>
-
             {% if form.non_field_errors %}
             <div class="error">{{ form.non_field_errors }}</div>
             {% endif %}

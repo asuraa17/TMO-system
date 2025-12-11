@@ -10,6 +10,7 @@ from django.core.files.base import ContentFile
 import uuid
 from django.utils.text import get_valid_filename
 from django.conf import settings
+from django.contrib.auth.hashers import make_password
 
 
 User = get_user_model()
@@ -49,9 +50,17 @@ def tmo_officer(request):
 
 def buyer_register(request):
     # view for buyer registration
+
+    preview_data = request.session.get("from_preview", False)
+
     if request.method == "POST":
         form = BuyerRegistrationForm(request.POST, request.FILES)
+
+
         if form.is_valid():
+
+            request.session["from_preview"] = True
+
             # store form data in session for preview (text data only, no password)
             request.session["registration_data"] = {
                 "full_name": form.cleaned_data["full_name"],
@@ -92,7 +101,7 @@ def buyer_register(request):
     else:
         registration_data = request.session.get("registration_data")
 
-        if registration_data:
+        if registration_data and preview_data:
             # pre-fill form with session data
             dob_str = registration_data.get("dob")
             dob_obj = date.fromisoformat(dob_str) if dob_str else None
@@ -104,11 +113,16 @@ def buyer_register(request):
                     "phone": registration_data.get("phone"),
                     "dob": dob_obj,
                     "email": registration_data.get("email"),
-                    # password not stored for security reasons
                 }
             )
         else:
+            request.session.pop("registration_data", None)
+            request.session.pop("temp_files", None) 
+            request.session.pop("file_names", None)
+
             form = BuyerRegistrationForm()
+
+    request.session.pop("from_preview", None)
 
     return render(
         request,
@@ -130,6 +144,8 @@ def buyer_register_preview(request):
             request, "No registration data found. Please fill the registration form."
         )
         return redirect("users:buyer_register")
+    
+    request.session["from_preview"] = True
 
     context = {
         "data": registration_data,
@@ -143,17 +159,27 @@ def buyer_register_submit(request):
     if request.method == "POST":
         registration_data = request.session.get("registration_data")
         temp_files = request.session.get("temp_files")
+        password = request.POST.get("password")
+        confirm_password = request.POST.get("confirm_password")
 
-        if not registration_data:
+        if not registration_data or not temp_files:
             messages.error(request, "Session expired. Please register again.")
             return redirect("users:buyer_register")
-
+        
+        if not password or not confirm_password or password != confirm_password:
+            context = {
+                "data": registration_data,
+                "files": request.session.get("file_names"),
+                "error": "Password do not match. Please try again"
+            }
+            return render(request,"users/buyer/registration_preview.html", context)
+        
         try:
             # create user
             user = User.objects.create_user(
                 username=registration_data["email"],
                 email=registration_data["email"],
-                password=registration_data["password"],
+                password=password,
                 role=User.Role.Buyer,
             )
 
