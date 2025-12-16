@@ -1,3 +1,4 @@
+from datetime import date
 from django import forms
 from django.contrib.auth import get_user_model
 from .models import BuyerProfile
@@ -67,6 +68,24 @@ class BuyerRegistrationForm(forms.Form):
         )
     )
 
+    def clean_dob(self):
+        dob = self.cleaned_data.get("dob")
+
+        if not dob:
+            raise forms.ValidationError("Date of birth is required")
+        
+        today = date.today()
+
+        if dob > today:
+            raise forms.ValidationError("Date of birth cannot be in the future")
+        
+        age = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
+
+        if age < 18:
+            raise forms.ValidationError(f"You must be at least 18 years old to register")
+        
+        return dob    
+    
     def clean_email(self):
         email = self.cleaned_data.get("email")
         if User.objects.filter(email=email).exists():
