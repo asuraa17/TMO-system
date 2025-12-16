@@ -11,6 +11,7 @@ import uuid
 from django.utils.text import get_valid_filename
 from django.conf import settings
 from django.contrib.auth.hashers import make_password
+from django.urls import reverse_lazy
 
 
 User = get_user_model()
@@ -28,7 +29,7 @@ def is_buyer(user):
     return user.is_authenticated and user.role == "buyer"
 
 
-@login_required
+@login_required(login_url=reverse_lazy("users:buyer_login"))
 def dashboard(request):
     # dashbaord view for all authenticated users
     context = {
@@ -38,7 +39,7 @@ def dashboard(request):
     return render(request, "users/dashboard.html", context)
 
 
-@login_required
+@login_required(login_url=reverse_lazy("users:buyer_login"))
 @user_passes_test(is_tmo_officer, login_url="/users/dashboard/")
 def tmo_officer(request):
     # dashboard only for tmo officers
@@ -236,7 +237,10 @@ def buyer_login(request):
             if user.role == "buyer":
                 login(request, user)
                 messages.success(request, f"Welcome, {user.username}!")
-                return redirect("users:buyer_home")
+
+                # go to next page if there is after login, else go to buyer home
+                next_url = request.GET.get('next', reverse_lazy("users:buyer_home"))
+                return redirect(next_url)
             else:
                 messages.error(request, "This account is not registered as a buyer.")
 
@@ -257,8 +261,8 @@ def buyer_logout(request):
     return redirect("users:buyer_login")
 
 
-@login_required
-@user_passes_test(is_buyer, login_url="/users/buyer/login/")
+@login_required(login_url=reverse_lazy("users:buyer_login"))
+@user_passes_test(is_buyer, login_url=reverse_lazy("users:buyer_login"))
 def buyer_home(request):
     # buyer home/dashboard view
     try:
