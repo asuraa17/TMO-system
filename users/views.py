@@ -38,17 +38,6 @@ def dashboard(request):
     }
     return render(request, "users/dashboard.html", context)
 
-
-@login_required(login_url=reverse_lazy("users:buyer_login"))
-@user_passes_test(is_tmo_officer, login_url="/users/dashboard/")
-def tmo_officer(request):
-    # dashboard only for tmo officers
-    context = {
-        "user": request.user,
-    }
-    return render(request, "users/tmo_dashboard.html", context)
-
-
 def buyer_register(request):
     # view for buyer registration
 
@@ -225,24 +214,45 @@ def buyer_register_submit(request):
 
 
 def buyer_login(request):
-    # buyer login view
+    #login view for both buyer and tmo
     if request.method == "POST":
-        email = request.POST.get("email")
+        email_or_username = request.POST.get("email")
         password = request.POST.get("password")
 
         # authenticate using email as username
-        user = authenticate(request, username=email, password=password)
+        user = authenticate(request, username=email_or_username, password=password)
 
         if user is not None:
-            if user.role == "buyer":
-                login(request, user)
-                messages.success(request, f"Welcome, {user.username}!")
+            login(request, user)
 
+            #redirect based on role
+            if user.role == "buyer":
+                messages.success(request, f"Welcome, {user.username}!")
                 # go to next page if there is after login, else go to buyer home
                 next_url = request.GET.get('next', reverse_lazy("users:buyer_home"))
                 return redirect(next_url)
+            
+            elif user.role == "tmo_officer":
+                messages.success(request, f"Welcome, {user.username}!")
+
+                #check for tmo officer profile
+                try:
+                    officer = user.tmo_officer_profile
+                    
+                    #if password not changed, redirect to change password
+                    if not officer.has_changed_password:
+                        return redirect('tmo:change_password')
+                    else:
+                        return redirect('tmo:profile') #should go to tmo dashboard but for now since tmo dashboard hasnt been created yet
+                    
+                except Exception as e: 
+                    messages.error(request, "TMO officer profile not found.")
+                    return redirect('users:dashboard')
+
             else:
-                messages.error(request, "This account is not registered as a buyer.")
+                #for other role, go to general dashboard
+                messages.success(request, f"Welcome, {user.username}!")
+                return redirect('users:dashboard')
 
         else:
             messages.error(request, "Invalid email or password.")

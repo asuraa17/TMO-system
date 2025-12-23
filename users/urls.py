@@ -6,7 +6,6 @@ app_name = "users"
 urlpatterns = [
     # General dashboard
     path("dashboard/", views.dashboard, name="dashboard"),
-    path("tmo/", views.tmo_officer, name="tmo_officer_dashboard"),
     # Buyer registration paths
     path("buyer/register/", views.buyer_register, name="buyer_register"),
     path(
