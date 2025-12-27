@@ -14,7 +14,7 @@ def is_tmo_officer(user):
     return user.is_authenticated and user.role == 'tmo_officer'
 
 
-@login_required(login_url=reverse_lazy('users:buyer_login'))
+@login_required(login_url=reverse_lazy('users:all_login'))
 @user_passes_test(is_tmo_officer, login_url=reverse_lazy('users:dashboard'))
 def tmo_profile(request):
     """Profile page for TMO Officers"""
@@ -43,7 +43,7 @@ def tmo_profile(request):
     return render(request, 'tmo/profile.html', context)
 
 
-@login_required(login_url=reverse_lazy('users:buyer_login'))
+@login_required(login_url=reverse_lazy('users:all_login'))
 @user_passes_test(is_tmo_officer, login_url=reverse_lazy('tmo:profile'))#dashboard
 def change_password(request):
     """
@@ -70,7 +70,7 @@ def change_password(request):
                 request, 
                 'Password changed successfully! Please login with your new password.'
             )
-            return redirect('users:buyer_login')
+            return redirect('users:all_login')
     else:
         form = PasswordChangeForm(request.user)
     

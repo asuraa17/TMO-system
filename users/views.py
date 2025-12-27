@@ -29,7 +29,7 @@ def is_buyer(user):
     return user.is_authenticated and user.role == "buyer"
 
 
-@login_required(login_url=reverse_lazy("users:buyer_login"))
+@login_required(login_url=reverse_lazy("users:all_login"))
 def dashboard(request):
     # dashbaord view for all authenticated users
     context = {
@@ -204,7 +204,7 @@ def buyer_register_submit(request):
             del request.session["file_names"]
 
             messages.success(request, "Registration successful! You can now log in.")
-            return redirect("users:buyer_login")
+            return redirect("users:all_login")
 
         except Exception as e:
             messages.error(request, f"Error creating user: {str(e)}")
@@ -213,7 +213,7 @@ def buyer_register_submit(request):
     return redirect("users:buyer_register")
 
 
-def buyer_login(request):
+def all_login(request):
     #login view for both buyer and tmo
     if request.method == "POST":
         email_or_username = request.POST.get("email")
@@ -260,19 +260,19 @@ def buyer_login(request):
     return render(request, "users/buyer/login.html")
 
 
-def buyer_logout(request):
-    # buyer logout view
+def all_logout(request):
+    # logout view for both buyer and tmo
     logout(request)
 
     # Clear existing messages
     list(messages.get_messages(request))
 
     messages.success(request, "You have been logged out.")
-    return redirect("users:buyer_login")
+    return redirect("users:all_login")
 
 
-@login_required(login_url=reverse_lazy("users:buyer_login"))
-@user_passes_test(is_buyer, login_url=reverse_lazy("users:buyer_login"))
+@login_required(login_url=reverse_lazy("users:all_login"))
+@user_passes_test(is_buyer, login_url=reverse_lazy("users:all_login"))
 def buyer_home(request):
     # buyer home/dashboard view
     try:
