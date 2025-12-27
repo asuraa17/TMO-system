@@ -13,7 +13,7 @@ class AuthenticationMiddleware:
         # paths that authenticated users should access
         restricted_paths = [
             reverse("users:buyer_register"),
-            reverse("users:buyer_login"),
+            reverse("users:all_login"),
         ]
 
         if request.user.is_authenticated and request.path in restricted_paths:
