@@ -18,11 +18,26 @@ class AuthenticationMiddleware:
 
         if request.user.is_authenticated and request.path in restricted_paths:
 
-            if hasattr(request.user, 'role') and request.user.role == 'buyer':
+            if hasattr(request.user, 'role'):
+                role = request.user.role
+
+                if role == 'buyer':
                     return redirect(reverse("users:buyer_home"))
                 
-            elif hasattr(request.user, 'role'):
+                elif role == 'tmo_officer':
+                    try:
+                        officer = request.user.tmo_officer_profile
+                        if not officer.has_changed_password:
+                            return redirect(reverse("tmo:change_password"))
+                        else:
+                            return redirect(reverse("tmo:dashboard"))
+                    except Exception:
+                        return redirect(reverse("tmo:dashboard"))
+                
+                else:
                     return redirect(reverse("users:dashboard"))
+            else:
+                return redirect(reverse("users:dashboard"))                
 
         response = self.get_response(request)
         return response

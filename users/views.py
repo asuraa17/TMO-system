@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
-from .forms import BuyerRegistrationForm
+from .forms import BuyerPasswordChangeForm, BuyerProfileUpdateForm, BuyerProfileUpdateFormVerified, BuyerRegistrationForm
 from .models import BuyerProfile
 from datetime import date
 from django.core.files.storage import default_storage
@@ -243,7 +243,7 @@ def all_login(request):
                     if not officer.has_changed_password:
                         return redirect('tmo:change_password')
                     else:
-                        return redirect('tmo:profile') #should go to tmo dashboard but for now since tmo dashboard hasnt been created yet
+                        return redirect('tmo:dashboard') #should go to tmo dashboard but for now since tmo dashboard hasnt been created yet
                     
                 except Exception as e: 
                     messages.error(request, "TMO officer profile not found.")
@@ -285,3 +285,113 @@ def buyer_home(request):
         "profile": buyer_profile,
     }
     return render(request, "users/buyer/home.html", context)
+
+# Add these views to users/views.py
+
+@login_required(login_url=reverse_lazy("users:all_login"))
+@user_passes_test(is_buyer, login_url=reverse_lazy("users:all_login"))
+def buyer_profile_update(request):
+    """
+    View for buyer to update profile information
+    Verified buyers can only update User fields (username, email)
+    Pending/Rejected buyers can update all fields
+    """
+    try:
+        buyer_profile = request.user.buyer_profile
+    except BuyerProfile.DoesNotExist:
+        messages.error(request, "Buyer profile not found.")
+        return redirect("users:buyer_home")
+    
+    is_verified = buyer_profile.verification_status == 'verified'
+    
+    if request.method == 'POST':
+        if is_verified:
+            # Use limited form for verified users
+            form = BuyerProfileUpdateFormVerified(
+                request.POST, 
+                instance=buyer_profile,
+                user=request.user
+            )
+        else:
+            # Use full form for pending/rejected users
+            form = BuyerProfileUpdateForm(
+                request.POST, 
+                request.FILES,
+                instance=buyer_profile,
+                user=request.user
+            )
+        
+        if form.is_valid():
+            # Update User model fields
+            request.user.username = form.cleaned_data['username']
+            request.user.email = form.cleaned_data['email']
+            request.user.first_name = form.cleaned_data.get('first_name', '')
+            request.user.last_name = form.cleaned_data.get('last_name', '')
+            request.user.save()
+            
+            # Save BuyerProfile
+            form.save()
+            
+            if buyer_profile.verification_status == 'rejected':
+                messages.success(
+                    request, 
+                    'Profile updated successfully! Your profile has been resubmitted for verification.'
+                )
+            else:
+                messages.success(request, 'Profile updated successfully!')
+            
+            return redirect('users:buyer_home')
+    else:
+        if is_verified:
+            form = BuyerProfileUpdateFormVerified(
+                instance=buyer_profile,
+                user=request.user
+            )
+        else:
+            form = BuyerProfileUpdateForm(
+                instance=buyer_profile,
+                user=request.user
+            )
+    
+    context = {
+        'form': form,
+        'profile': buyer_profile,
+        'is_verified': is_verified,
+    }
+    
+    return render(request, 'users/buyer/profile_update.html', context)
+
+
+@login_required(login_url=reverse_lazy("users:all_login"))
+@user_passes_test(is_buyer, login_url=reverse_lazy("users:all_login"))
+def buyer_change_password(request):
+    """
+    View for buyer to change password
+    """
+    try:
+        buyer_profile = request.user.buyer_profile
+    except BuyerProfile.DoesNotExist:
+        messages.error(request, "Buyer profile not found.")
+        return redirect("users:buyer_home")
+    
+    if request.method == 'POST':
+        form = BuyerPasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            new_password = form.cleaned_data['new_password']
+            request.user.set_password(new_password)
+            request.user.save()
+            
+            messages.success(
+                request,
+                'Password changed successfully! Please login with your new password.'
+            )
+            return redirect('users:all_login')
+    else:
+        form = BuyerPasswordChangeForm(request.user)
+    
+    context = {
+        'form': form,
+        'profile': buyer_profile,
+    }
+    
+    return render(request, 'users/buyer/change_password.html', context)
