@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buyer Verification Detail</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+        }
+        .navbar {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 20px 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .navbar h1 {
+            font-size: 28px;
+        }
+        .nav-links {
+            display: flex;
+            gap: 15px;
+        }
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 20px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 5px;
+        }
+        .nav-links a:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        .detail-card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .detail-card h2 {
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #28a745;
+        }
+        .status-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .status-badge {
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .status-verified {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status-rejected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .info-item {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .info-item label {
+            display: block;
+            color: #666;
+            font-size: 13px;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .info-item .value {
+            color: #333;
+            font-size: 16px;
+        }
+        .documents-section {
+            margin-top: 30px;
+        }
+        .documents-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        .documents-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        .document-item {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .document-item label {
+            color: #666;
+            font-weight: bold;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-view {
+            background: #007bff;
+            color: white;
+        }
+        .btn-view:hover {
+            background: #0056b3;
+        }
+        .action-section {
+            margin-top: 30px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .action-section h3 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .btn-success {
+            background: #28a745;
+            color: white;
+            flex: 1;
+        }
+        .btn-success:hover {
+            background: #218838;
+        }
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+            flex: 1;
+        }
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            font-family: Arial, sans-serif;
+            resize: vertical;
+            min-height: 100px;
+        }
+        .form-group {
+            margin-top: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: bold;
+        }
+        .alert {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .verification-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e7f3ff;
+            border-radius: 8px;
+            border-left: 4px solid #007bff;
+        }
+        .verification-info p {
+            margin: 5px 0;
+            color: #333;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+        }
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 90%;
+        }
+        .modal-content h3 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>Buyer Verification Detail</h1>
+        <div class="nav-links">
+            <a href="{% url 'tmo:buyer_verification_list' %}">Back to List</a>
+            <a href="{% url 'tmo:dashboard' %}">Dashboard</a>
+            <a href="{% url 'users:all_logout' %}">Logout</a>
+        </div>
+    </div>
+
+    <div class="container">
+        {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="detail-card">
+            <div class="status-header">
+                <h2>{{ buyer.full_name }}</h2>
+                <span class="status-badge status-{{ buyer.verification_status }}">
+                    {{ buyer.get_verification_status_display }}
+                </span>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>Full Name</label>
+                    <div class="value">{{ buyer.full_name }}</div>
+                </div>
+                <div class="info-item">
+                    <label>Email</label>
+                    <div class="value">{{ buyer.user.email }}</div>
+                </div>
+                <div class="info-item">
+                    <label>Phone Number</label>
+                    <div class="value">{{ buyer.phone }}</div>
+                </div>
+                <div class="info-item">
+                    <label>Date of Birth</label>
+                    <div class="value">{{ buyer.dob|date:"M d, Y" }}</div>
+                </div>
+                <div class="info-item">
+                    <label>Address</label>
+                    <div class="value">{{ buyer.address }}</div>
+                </div>
+                <div class="info-item">
+                    <label>Registration Date</label>
+                    <div class="value">{{ buyer.created_at|date:"M d, Y H:i" }}</div>
+                </div>
+            </div>
+
+            <div class="documents-section">
+                <h3>Uploaded Documents</h3>
+                <div class="documents-grid">
+                    {% if buyer.citizenship_file %}
+                    <div class="document-item">
+                        <label>Citizenship Document</label>
+                        <a href="{{ buyer.citizenship_file.url }}" target="_blank" class="btn btn-view">View</a>
+                    </div>
+                    {% endif %}
+                    
+                    {% if buyer.nid_file %}
+                    <div class="document-item">
+                        <label>NID Document</label>
+                        <a href="{{ buyer.nid_file.url }}" target="_blank" class="btn btn-view">View</a>
+                    </div>
+                    {% endif %}
+                    
+                    {% if buyer.passport_photo %}
+                    <div class="document-item">
+                        <label>Passport Photo</label>
+                        <a href="{{ buyer.passport_photo.url }}" target="_blank" class="btn btn-view">View</a>
+                    </div>
+                    {% endif %}
+                    
+                    {% if buyer.signature_image %}
+                    <div class="document-item">
+                        <label>Signature</label>
+                        <a href="{{ buyer.signature_image.url }}" target="_blank" class="btn btn-view">View</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if buyer.verification_status != 'pending' %}
+            <div class="verification-info">
+                <p><strong>Verified By:</strong> {{ buyer.verified_by.full_name }} ({{ buyer.verified_by.officer_id }})</p>
+                <p><strong>Verification Date:</strong> {{ buyer.verified_at|date:"M d, Y H:i" }}</p>
+                {% if buyer.verification_remarks %}
+                <p><strong>Remarks:</strong> {{ buyer.verification_remarks }}</p>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            {% if buyer.verification_status == 'pending' or buyer.verification_status == 'rejected' %}
+            <div class="action-section">
+                <h3>Verification Actions</h3>
+                
+                {% if buyer.verification_status == 'rejected' %}
+                <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #ffc107;">
+                    <p style="color: #856404; margin: 0;"><strong>Note:</strong> This buyer was previously rejected. User can update their details and resubmit for verification.</p>
+                </div>
+                {% endif %}
+                
+                <div class="action-buttons">
+                    <button onclick="showVerifyModal()" class="btn btn-success">✓ Verify Buyer</button>
+                    <button onclick="showRejectModal()" class="btn btn-danger">✗ Reject Buyer</button>
+                </div>
+                
+                <a href="{% url 'tmo:buyer_verification_list' %}" class="btn btn-secondary">Back to List</a>
+            </div>
+            {% else %}
+            <div class="action-section">
+                <div style="background: #d4edda; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #28a745;">
+                    <p style="color: #155724; margin: 0;"><strong>Status:</strong> This buyer has been verified and cannot be modified unless updated by admin.</p>
+                </div>
+                <a href="{% url 'tmo:buyer_verification_list' %}" class="btn btn-secondary">Back to List</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Verify Modal -->
+    <div id="verifyModal" class="modal">
+        <div class="modal-content">
+            <h3>Verify Buyer Registration</h3>
+            <form method="post" action="{% url 'tmo:verify_buyer' buyer.id %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label>Remarks (Optional)</label>
+                    <textarea name="remarks" placeholder="Add any verification notes..."></textarea>
+                </div>
+                <div class="action-buttons">
+                    <button type="submit" class="btn btn-success">Confirm Verification</button>
+                    <button type="button" onclick="closeModals()" class="btn btn-secondary">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Reject Modal -->
+    <div id="rejectModal" class="modal">
+        <div class="modal-content">
+            <h3>Reject Buyer Registration</h3>
+            <form method="post" action="{% url 'tmo:reject_buyer' buyer.id %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label>Rejection Reason (Required)</label>
+                    <textarea name="remarks" required placeholder="Please provide a reason for rejection..."></textarea>
+                </div>
+                <div class="action-buttons">
+                    <button type="submit" class="btn btn-danger">Confirm Rejection</button>
+                    <button type="button" onclick="closeModals()" class="btn btn-secondary">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function showVerifyModal() {
+            document.getElementById('verifyModal').classList.add('active');
+        }
+
+        function showRejectModal() {
+            document.getElementById('rejectModal').classList.add('active');
+        }
+
+        function closeModals() {
+            document.getElementById('verifyModal').classList.remove('active');
+            document.getElementById('rejectModal').classList.remove('active');
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const verifyModal = document.getElementById('verifyModal');
+            const rejectModal = document.getElementById('rejectModal');
+            if (event.target === verifyModal) {
+                closeModals();
+            }
+            if (event.target === rejectModal) {
+                closeModals();
+            }
+        }
+    </script>
+</body>
+</html>

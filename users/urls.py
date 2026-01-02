@@ -19,8 +19,12 @@ urlpatterns = [
         name="buyer_register_submit",
     ),
     # Buyer authentication paths
-    path("buyer/login/", views.buyer_login, name="buyer_login"),
-    path("buyer/logout/", views.buyer_logout, name="buyer_logout"),
+    path("buyer/login/", views.all_login, name="all_login"),
+    path("buyer/logout/", views.all_logout, name="all_logout"),
     # Buyer home path
     path("buyer/home/", views.buyer_home, name="buyer_home"),
+
+    # Buyer profile update paths
+    path("buyer/profile/update/", views.buyer_profile_update, name="buyer_profile_update"),
+    path("buyer/password/change/", views.buyer_change_password, name="buyer_change_password"),
 ]
