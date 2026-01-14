@@ -159,7 +159,6 @@
     <div class="navbar">
         <h1>TMO Dashboard</h1>
         <div class="nav-links">
-            <a href="{% url 'tmo:dashboard' %}">Dashboard</a>
             <a href="{% url 'tmo:profile' %}">Profile</a>
             <a href="{% url 'users:all_logout' %}">Logout</a>
         </div>
@@ -192,9 +191,46 @@
             </div>
         </div>
 
+        <div class="stats-grid">
+            <div class="stat-card warning">
+                <h3>Pending Showrooms</h3>
+                <div class="number">{{ pending_showrooms }}</div>
+            </div>
+            <div class="stat-card success">
+                <h3>Verified Showrooms</h3>
+                <div class="number">{{ verified_showrooms }}</div>
+            </div>
+            <div class="stat-card danger">
+                <h3>Rejected Showrooms</h3>
+                <div class="number">{{ rejected_showrooms }}</div>
+            </div>
+        </div>
+        <div class="stats-grid">
+            <div class="stat-card warning">
+                <h3>Pending Vehicles</h3>
+                <div class="number">{{ pending_vehicles }}</div>
+            </div>
+            <div class="stat-card success">
+                <h3>Verified Vehicles</h3>
+                <div class="number">{{ verified_vehicles }}</div>
+            </div>
+            <div class="stat-card danger">
+                <h3>Rejected Vehicles</h3>
+                <div class="number">{{ rejected_vehicles }}</div>
+            </div>
+        </div>
+
         <div class="actions-card">
             <h2>Quick Actions</h2>
             <div class="action-list">
+                <div class="action-item">
+                    <div>
+                        <h3>My Profile</h3>
+                        <p>View and update your profile information</p>
+                    </div>
+                    <a href="{% url 'tmo:profile' %}" class="btn btn-primary">View Profile</a>
+                </div>
+
                 <div class="action-item">
                     <div>
                         <h3>Buyer Verification</h3>
@@ -202,12 +238,20 @@
                     </div>
                     <a href="{% url 'tmo:buyer_verification_list' %}" class="btn btn-primary">Go to Verification</a>
                 </div>
+                
                 <div class="action-item">
                     <div>
-                        <h3>My Profile</h3>
-                        <p>View and update your profile information</p>
+                        <h3>Showroom Verification</h3>
+                        <p>Review and verify showroom registrations</p>
                     </div>
-                    <a href="{% url 'tmo:profile' %}" class="btn btn-primary">View Profile</a>
+                    <a href="{% url 'tmo:showroom_verification_list' %}" class="btn btn-primary">Go to Showrooms</a>
+                </div>
+                <div class="action-item">
+                    <div>
+                        <h3>Vehicle Verification</h3>
+                        <p>Review and verify vehicle registrations</p>
+                    </div>
+                    <a href="{% url 'tmo:vehicle_verification_list' %}" class="btn btn-primary">Go to Vehicles</a>
                 </div>
             </div>
         </div>

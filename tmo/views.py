@@ -5,6 +5,9 @@ from django.urls import reverse_lazy
 from .models import TMOOfficer
 from users.models import BuyerProfile
 from .forms import PasswordChangeForm, TMOOfficerProfileForm
+from users.models import ShowroomProfile, Vehicle
+from django.utils import timezone
+
 
 # Create your views here.
 
@@ -45,7 +48,7 @@ def tmo_profile(request):
 
 
 @login_required(login_url=reverse_lazy('users:all_login'))
-@user_passes_test(is_tmo_officer, login_url=reverse_lazy('tmo:dashboard'))
+@user_passes_test(is_tmo_officer, login_url=reverse_lazy('users:dashboard'))
 def change_password(request):
     """
     Password change view for TMO Officers
@@ -98,12 +101,24 @@ def tmo_dashboard(request):
     pending_buyers = BuyerProfile.objects.filter(verification_status='pending').count()
     verified_buyers = BuyerProfile.objects.filter(verification_status='verified').count()
     rejected_buyers = BuyerProfile.objects.filter(verification_status='rejected').count()
+    pending_showrooms = ShowroomProfile.objects.filter(verification_status='pending').count()
+    verified_showrooms = ShowroomProfile.objects.filter(verification_status='verified').count()
+    rejected_showrooms = ShowroomProfile.objects.filter(verification_status='rejected').count()
+    pending_vehicles = Vehicle.objects.filter(verification_status='pending').count()
+    verified_vehicles = Vehicle.objects.filter(verification_status='verified').count()
+    rejected_vehicles = Vehicle.objects.filter(verification_status='rejected').count()
     
     context = {
         'officer': officer,
         'pending_buyers': pending_buyers,
         'verified_buyers': verified_buyers,
         'rejected_buyers': rejected_buyers,
+        'pending_showrooms': pending_showrooms,
+        'verified_showrooms': verified_showrooms,
+        'rejected_showrooms': rejected_showrooms,
+        'pending_vehicles': pending_vehicles,
+        'verified_vehicles': verified_vehicles,
+        'rejected_vehicles': rejected_vehicles,
     }
     
     return render(request, 'tmo/dashboard.html', context)
@@ -217,3 +232,193 @@ def reject_buyer(request, buyer_id):
         return redirect('tmo:buyer_verification_list')
     
     return redirect('tmo:buyer_verification_detail', buyer_id=buyer_id)
+
+@login_required(login_url=reverse_lazy('users:all_login'))
+@user_passes_test(is_tmo_officer, login_url=reverse_lazy('users:dashboard'))
+def showroom_verification_list(request):
+    """List all showrooms for verification"""
+    try:
+        officer = request.user.tmo_officer_profile
+    except TMOOfficer.DoesNotExist:
+        messages.error(request, 'TMO Officer profile not found.')
+        return redirect('users:dashboard')
+    
+    status = request.GET.get('status', 'pending')
+    
+    if status == 'all':
+        showrooms = ShowroomProfile.objects.all().order_by('-created_at')
+    else:
+        showrooms = ShowroomProfile.objects.filter(verification_status=status).order_by('-created_at')
+    
+    context = {'officer': officer, 'showrooms': showrooms, 'current_status': status}
+    return render(request, 'tmo/showroom_verification_list.html', context)
+
+
+@login_required(login_url=reverse_lazy('users:all_login'))
+@user_passes_test(is_tmo_officer, login_url=reverse_lazy('users:dashboard'))
+def showroom_verification_detail(request, showroom_id):
+    """View detailed information about a showroom for verification"""
+    try:
+        officer = request.user.tmo_officer_profile
+    except TMOOfficer.DoesNotExist:
+        messages.error(request, 'TMO Officer profile not found.')
+        return redirect('users:dashboard')
+    
+    showroom = get_object_or_404(ShowroomProfile, id=showroom_id)
+    context = {'officer': officer, 'showroom': showroom}
+    return render(request, 'tmo/showroom_verification_detail.html', context)
+
+
+@login_required(login_url=reverse_lazy('users:all_login'))
+@user_passes_test(is_tmo_officer, login_url=reverse_lazy('users:dashboard'))
+def verify_showroom(request, showroom_id):
+    """Verify a showroom"""
+    if request.method == 'POST':
+        from users.models import ShowroomProfile
+        showroom = get_object_or_404(ShowroomProfile, id=showroom_id)
+        officer = request.user.tmo_officer_profile
+        
+        if showroom.verification_status == 'verified':
+            messages.error(request, 'This showroom is already verified.')
+            return redirect('tmo:showroom_verification_detail', showroom_id=showroom_id)
+        
+        showroom.verification_status = 'verified'
+        showroom.verified_by = officer
+        showroom.verification_remarks = request.POST.get('remarks', '')
+        showroom.save()
+        
+        messages.success(request, f'Showroom {showroom.showroom_name} has been verified.')
+        return redirect('tmo:showroom_verification_list')
+    
+    return redirect('tmo:showroom_verification_detail', showroom_id=showroom_id)
+
+
+@login_required(login_url=reverse_lazy('users:all_login'))
+@user_passes_test(is_tmo_officer, login_url=reverse_lazy('users:dashboard'))
+def reject_showroom(request, showroom_id):
+    """Reject a showroom"""
+    if request.method == 'POST':
+        from users.models import ShowroomProfile
+        showroom = get_object_or_404(ShowroomProfile, id=showroom_id)
+        officer = request.user.tmo_officer_profile
+        
+        if showroom.verification_status == 'verified':
+            messages.error(request, 'This showroom is already verified.')
+            return redirect('tmo:showroom_verification_detail', showroom_id=showroom_id)
+        
+        remarks = request.POST.get('remarks', '').strip()
+        if not remarks:
+            messages.error(request, 'Rejection remarks are required.')
+            return redirect('tmo:showroom_verification_detail', showroom_id=showroom_id)
+        
+        showroom.verification_status = 'rejected'
+        showroom.verified_by = officer
+        showroom.verification_remarks = remarks
+        showroom.save()
+        
+        messages.success(request, f'Showroom {showroom.showroom_name} has been rejected.')
+        return redirect('tmo:showroom_verification_list')
+    
+    return redirect('tmo:showroom_verification_detail', showroom_id=showroom_id)
+
+@login_required(login_url=reverse_lazy('users:all_login'))
+@user_passes_test(is_tmo_officer, login_url=reverse_lazy('users:dashboard'))
+def vehicle_verification_list(request):
+    """List all vehicles for verification"""
+    try:
+        officer = request.user.tmo_officer_profile
+    except TMOOfficer.DoesNotExist:
+        messages.error(request, 'TMO Officer profile not found.')
+        return redirect('users:dashboard')
+    
+    status = request.GET.get('status', 'pending')
+    
+    if status == 'all':
+        vehicles = Vehicle.objects.all().order_by('-created_at')
+    else:
+        vehicles = Vehicle.objects.filter(verification_status=status).order_by('-created_at')
+    
+    context = {'officer': officer, 'vehicles': vehicles, 'current_status': status}
+    return render(request, 'tmo/vehicle_verification_list.html', context)
+
+
+@login_required(login_url=reverse_lazy('users:all_login'))
+@user_passes_test(is_tmo_officer, login_url=reverse_lazy('users:dashboard'))
+def vehicle_verification_detail(request, vehicle_id):
+    """View detailed information about a vehicle for verification"""
+    try:
+        officer = request.user.tmo_officer_profile
+    except TMOOfficer.DoesNotExist:
+        messages.error(request, 'TMO Officer profile not found.')
+        return redirect('users:dashboard')
+    
+    vehicle = get_object_or_404(Vehicle, id=vehicle_id)
+    ownership_history = vehicle.ownership_history.all()
+    
+    context = {'officer': officer, 'vehicle': vehicle, 'ownership_history': ownership_history}
+    return render(request, 'tmo/vehicle_verification_detail.html', context)
+
+
+@login_required(login_url=reverse_lazy('users:all_login'))
+@user_passes_test(is_tmo_officer, login_url=reverse_lazy('users:dashboard'))
+def verify_vehicle(request, vehicle_id):
+    """Verify a vehicle and assign permanent plate number"""
+    if request.method == 'POST':
+        vehicle = get_object_or_404(Vehicle, id=vehicle_id)
+        officer = request.user.tmo_officer_profile
+        
+        # Check if already verified
+        if vehicle.verification_status == 'verified':
+            messages.error(request, 'This vehicle is already verified.')
+            return redirect('tmo:vehicle_verification_detail', vehicle_id=vehicle_id)
+        
+        permanent_plate = request.POST.get('permanent_plate_number', '').strip()
+        if not permanent_plate:
+            messages.error(request, 'Permanent plate number is required.')
+            return redirect('tmo:vehicle_verification_detail', vehicle_id=vehicle_id)
+        
+        # Check if plate number already exists
+        if Vehicle.objects.filter(permanent_plate_number=permanent_plate).exists():
+            messages.error(request, 'This plate number is already assigned to another vehicle.')
+            return redirect('tmo:vehicle_verification_detail', vehicle_id=vehicle_id)
+        
+        # Update vehicle verification
+        vehicle.verification_status = 'verified'  # Fixed: was is_verified
+        vehicle.verified_by = officer
+        vehicle.permanent_plate_number = permanent_plate
+        vehicle.verification_remarks = request.POST.get('remarks', '')
+        vehicle.verified_at = timezone.now()
+        vehicle.save()
+        
+        messages.success(request, f'Vehicle verified! Permanent plate: {permanent_plate}')
+        return redirect('tmo:vehicle_verification_list')
+    
+    return redirect('tmo:vehicle_verification_detail', vehicle_id=vehicle_id)
+
+@login_required(login_url=reverse_lazy('users:all_login'))
+@user_passes_test(is_tmo_officer, login_url=reverse_lazy('users:dashboard'))
+def reject_vehicle(request, vehicle_id):
+    """Reject a vehicle registration"""
+    if request.method == 'POST':
+        vehicle = get_object_or_404(Vehicle, id=vehicle_id)
+        officer = request.user.tmo_officer_profile
+        
+        if vehicle.verification_status == 'verified':
+            messages.error(request, 'This vehicle is already verified and cannot be rejected.')
+            return redirect('tmo:vehicle_verification_detail', vehicle_id=vehicle_id)
+        
+        remarks = request.POST.get('remarks', '').strip()
+        if not remarks:
+            messages.error(request, 'Rejection remarks are required.')
+            return redirect('tmo:vehicle_verification_detail', vehicle_id=vehicle_id)
+        
+        vehicle.verification_status = 'rejected'
+        vehicle.verified_by = officer
+        vehicle.verification_remarks = remarks
+        vehicle.verified_at = timezone.now()
+        vehicle.save()
+        
+        messages.success(request, f'Vehicle {vehicle.chassis_number} has been rejected.')
+        return redirect('tmo:vehicle_verification_list')
+    
+    return redirect('tmo:vehicle_verification_detail', vehicle_id=vehicle_id)

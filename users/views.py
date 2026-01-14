@@ -1,16 +1,19 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
+from showroom.forms import ShowroomPasswordChangeForm
+from showroom.views import is_showroom
+from tmo.forms import PasswordChangeForm
+from tmo.models import TMOOfficer
 from .forms import BuyerPasswordChangeForm, BuyerProfileUpdateForm, BuyerProfileUpdateFormVerified, BuyerRegistrationForm
-from .models import BuyerProfile
+from .models import BuyerProfile, ShowroomProfile
 from datetime import date
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 import uuid
 from django.utils.text import get_valid_filename
 from django.conf import settings
-from django.contrib.auth.hashers import make_password
 from django.urls import reverse_lazy
 
 
@@ -245,10 +248,14 @@ def all_login(request):
                     else:
                         return redirect('tmo:dashboard') #should go to tmo dashboard but for now since tmo dashboard hasnt been created yet
                     
-                except Exception as e: 
+                except Exception: 
                     messages.error(request, "TMO officer profile not found.")
                     return redirect('users:dashboard')
-
+                
+            elif user.role == "showroom":
+                messages.success(request, f"Welcome, {user.username}!")
+                return redirect('showroom:dashboard')
+                    
             else:
                 #for other role, go to general dashboard
                 messages.success(request, f"Welcome, {user.username}!")
@@ -272,7 +279,7 @@ def all_logout(request):
 
 
 @login_required(login_url=reverse_lazy("users:all_login"))
-@user_passes_test(is_buyer, login_url=reverse_lazy("users:all_login"))
+@user_passes_test(is_buyer, login_url=reverse_lazy("users:dashboard"))
 def buyer_home(request):
     # buyer home/dashboard view
     try:
@@ -286,10 +293,9 @@ def buyer_home(request):
     }
     return render(request, "users/buyer/home.html", context)
 
-# Add these views to users/views.py
 
 @login_required(login_url=reverse_lazy("users:all_login"))
-@user_passes_test(is_buyer, login_url=reverse_lazy("users:all_login"))
+@user_passes_test(is_buyer, login_url=reverse_lazy("users:dashboard"))
 def buyer_profile_update(request):
     """
     View for buyer to update profile information
@@ -361,13 +367,10 @@ def buyer_profile_update(request):
     
     return render(request, 'users/buyer/profile_update.html', context)
 
-
 @login_required(login_url=reverse_lazy("users:all_login"))
-@user_passes_test(is_buyer, login_url=reverse_lazy("users:all_login"))
+@user_passes_test(is_buyer, login_url=reverse_lazy("users:dashboard"))
 def buyer_change_password(request):
-    """
-    View for buyer to change password
-    """
+    """View for buyer to change password"""
     try:
         buyer_profile = request.user.buyer_profile
     except BuyerProfile.DoesNotExist:
@@ -395,3 +398,140 @@ def buyer_change_password(request):
     }
     
     return render(request, 'users/buyer/change_password.html', context)
+
+@login_required(login_url=reverse_lazy("users:all_login"))
+@user_passes_test(is_showroom, login_url=reverse_lazy("users:dashboard"))
+def showroom_change_password(request):
+    """Change showroom password"""
+    try:
+        showroom = request.user.showroom_profile
+    except ShowroomProfile.DoesNotExist:
+        messages.error(request, "Showroom profile not found.")
+        return redirect("showroom:dashboard")  # Fixed: was users:dashboard
+
+    if request.method == 'POST':
+        form = ShowroomPasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            new_password = form.cleaned_data['new_password']
+            request.user.set_password(new_password)
+            request.user.save()
+
+            messages.success(
+                request,
+                'Password changed successfully! Please login with your new password.'
+            )
+            return redirect('users:all_login')
+    else:
+        form = ShowroomPasswordChangeForm(request.user)
+
+    context = {'form': form, 'showroom': showroom}
+    return render(request, 'showroom/change_password.html', context)
+
+
+@login_required(login_url=reverse_lazy('users:all_login'))
+@user_passes_test(is_tmo_officer, login_url=reverse_lazy('users:dashboard'))
+def change_password(request):
+    """Password change view for TMO Officers"""
+    try:
+        officer = request.user.tmo_officer_profile
+    except TMOOfficer.DoesNotExist:
+        messages.error(request, 'TMO Officer profile not found.')
+        return redirect('tmo:dashboard')  # Fixed: was users:dashboard
+    
+    if request.method == 'POST':
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            new_password = form.cleaned_data['new_password']
+            request.user.set_password(new_password)
+            request.user.save()
+            
+            # Mark password as changed
+            officer.has_changed_password = True
+            officer.save()
+            
+            messages.success(
+                request, 
+                'Password changed successfully! Please login with your new password.'
+            )
+            return redirect('users:all_login')
+    else:
+        form = PasswordChangeForm(request.user)
+    
+    context = {
+        'form': form,
+        'officer': officer,
+    }
+    
+    return render(request, 'tmo/change_password.html', context)
+
+@login_required(login_url=reverse_lazy("users:all_login"))
+@user_passes_test(is_buyer, login_url=reverse_lazy("users:dashboard"))
+def buyer_vehicles(request):
+    """
+    View for buyer to see their registered vehicles
+    Only shows vehicles owned by the current buyer
+    """
+    try:
+        buyer_profile = request.user.buyer_profile
+    except BuyerProfile.DoesNotExist:
+        messages.error(request, "Buyer profile not found.")
+        return redirect("users:buyer_home")
+    
+    # Check if buyer is verified
+    if buyer_profile.verification_status != 'verified':
+        messages.warning(
+            request,
+            f"Your profile must be verified to view vehicles. Current status: {buyer_profile.get_verification_status_display()}"
+        )
+        return redirect("users:buyer_home")
+    
+    # Get all vehicles owned by this buyer
+    from users.models import Vehicle
+    vehicles = Vehicle.objects.filter(current_owner=buyer_profile).order_by('-created_at')
+    
+    # Get statistics
+    total_vehicles = vehicles.count()
+    verified_vehicles = vehicles.filter(verification_status='verified').count()
+    pending_vehicles = vehicles.filter(verification_status='pending').count()
+    
+    context = {
+        'buyer_profile': buyer_profile,
+        'vehicles': vehicles,
+        'total_vehicles': total_vehicles,
+        'verified_vehicles': verified_vehicles,
+        'pending_vehicles': pending_vehicles,
+    }
+    
+    return render(request, 'users/buyer/my_vehicles.html', context)
+
+
+@login_required(login_url=reverse_lazy("users:all_login"))
+@user_passes_test(is_buyer, login_url=reverse_lazy("users:dashboard"))
+def buyer_vehicle_detail(request, vehicle_id):
+    """
+    View for buyer to see detailed information about their vehicle
+    """
+    try:
+        buyer_profile = request.user.buyer_profile
+    except BuyerProfile.DoesNotExist:
+        messages.error(request, "Buyer profile not found.")
+        return redirect("users:buyer_home")
+    
+    # Get vehicle and ensure it belongs to this buyer
+    from users.models import Vehicle
+    vehicle = get_object_or_404(
+        Vehicle, 
+        id=vehicle_id, 
+        current_owner=buyer_profile
+    )
+    
+    # Get ownership history
+    ownership_history = vehicle.ownership_history.all().order_by('-purchase_date')
+    
+    context = {
+        'buyer_profile': buyer_profile,
+        'vehicle': vehicle,
+        'ownership_history': ownership_history,
+    }
+    
+    return render(request, 'users/buyer/vehicle_detail.html', context)

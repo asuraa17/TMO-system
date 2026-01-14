@@ -92,6 +92,33 @@
             color: #004085;
             margin: 0;
         }
+        .readonly-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        .readonly-info h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        .info-row {
+            display: flex;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        .info-label {
+            font-weight: bold;
+            color: #555;
+            min-width: 150px;
+        }
+        .info-value {
+            color: #333;
+        }
         .form-section {
             margin-bottom: 30px;
         }
@@ -185,7 +212,7 @@
             <h2>Update Profile Information</h2>
             <p class="subtitle">
                 {% if is_verified %}
-                    Your profile is verified. You can only update account information.
+                    Your profile is verified. You can update account information and phone number.
                 {% else %}
                     Update your profile information below.
                 {% endif %}
@@ -193,7 +220,29 @@
 
             {% if is_verified %}
             <div class="locked-notice">
-                <p><strong>Notice:</strong> Your profile has been verified. Profile details (full name, address, phone, DOB, documents) are locked. You can only update username, email, first name, and last name.</p>
+                <p><strong>Notice:</strong> Your profile has been verified. You can update username, email, and phone number. Other profile details (full name, address, DOB, documents) are locked.</p>
+            </div>
+
+            <!-- Read-only information for verified buyers -->
+            <div class="readonly-info">
+                <h3>Verified Profile Details (Read-Only)</h3>
+                
+                <div class="info-row">
+                    <div class="info-label">Full Name:</div>
+                    <div class="info-value">{{ profile.full_name }}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Address:</div>
+                    <div class="info-value">{{ profile.address }}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Date of Birth:</div>
+                    <div class="info-value">{{ profile.dob|date:"F d, Y" }}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Member Since:</div>
+                    <div class="info-value">{{ profile.created_at|date:"F d, Y" }}</div>
+                </div>
             </div>
             {% endif %}
 
@@ -251,6 +300,20 @@
                             </ul>
                         {% endif %}
                     </div>
+
+                    <!-- Phone Number (Always Editable) -->
+                    <div class="form-group">
+                        <label for="id_phone">Phone Number <span class="required">*</span></label>
+                        {{ form.phone }}
+                        <div class="help-text">10 digits only</div>
+                        {% if form.phone.errors %}
+                            <ul class="error-list">
+                                {% for error in form.phone.errors %}
+                                <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
                 </div>
 
                 {% if not is_verified %}
@@ -276,19 +339,6 @@
                         {% if form.address.errors %}
                             <ul class="error-list">
                                 {% for error in form.address.errors %}
-                                <li>{{ error }}</li>
-                                {% endfor %}
-                            </ul>
-                        {% endif %}
-                    </div>
-
-                    <div class="form-group">
-                        <label for="id_phone">Phone Number <span class="required">*</span></label>
-                        {{ form.phone }}
-                        <div class="help-text">10 digits only</div>
-                        {% if form.phone.errors %}
-                            <ul class="error-list">
-                                {% for error in form.phone.errors %}
                                 <li>{{ error }}</li>
                                 {% endfor %}
                             </ul>
