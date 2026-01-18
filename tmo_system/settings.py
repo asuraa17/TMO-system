@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "users",
     "tmo",
+    "showroom",
 ]
 
 MIDDLEWARE = [

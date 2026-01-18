@@ -246,11 +246,10 @@ class BuyerPasswordChangeForm(forms.Form):
         
         return cleaned_data
 
-
 class BuyerProfileUpdateFormVerified(forms.ModelForm):
     """
-    Limited form for verified buyers - can only update username and User fields
-    Profile details are locked
+    Limited form for verified buyers - can update username, email, and phone
+    Other profile details are locked
     """
     username = forms.CharField(
         max_length=150,
@@ -261,9 +260,27 @@ class BuyerProfileUpdateFormVerified(forms.ModelForm):
         widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email Address'})
     )
     
+    first_name = forms.CharField(
+        max_length=150,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'First Name'})
+    )
+    
+    last_name = forms.CharField(
+        max_length=150,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Last Name'})
+    )
+    
     class Meta:
         model = BuyerProfile
-        fields = []  # No BuyerProfile fields for verified users
+        fields = ['phone']  # Allow phone update for verified users
+        widgets = {
+            'phone': forms.TextInput(attrs={
+                'class': 'form-control', 
+                'placeholder': 'Phone Number'
+            }),
+        }
     
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
@@ -272,6 +289,8 @@ class BuyerProfileUpdateFormVerified(forms.ModelForm):
         if self.user:
             self.fields['username'].initial = self.user.username
             self.fields['email'].initial = self.user.email
+            self.fields['first_name'].initial = self.user.first_name
+            self.fields['last_name'].initial = self.user.last_name
     
     def clean_username(self):
         username = self.cleaned_data.get('username')
@@ -284,3 +303,11 @@ class BuyerProfileUpdateFormVerified(forms.ModelForm):
         if self.user and User.objects.filter(email=email).exclude(pk=self.user.pk).exists():
             raise forms.ValidationError('This email is already registered.')
         return email
+    
+    def clean_phone(self):
+        phone = self.cleaned_data.get('phone')
+        if not phone.isdigit():
+            raise forms.ValidationError('Phone number must contain only digits.')
+        if len(phone) != 10:
+            raise forms.ValidationError('Phone number must be exactly 10 digits.')
+        return phone

@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='buyerprofile',
             name='verification_status',
-            field=models.CharField(choices=[('pending', 'Pending'), ('verified', 'Verified'), ('rejectde', 'Rejected')], default='pending', help_text='Verification status by TMO Officer', max_length=20),
+            field=models.CharField(choices=[('pending', 'Pending'), ('verified', 'Verified'), ('rejected', 'Rejected')], default='pending', help_text='Verification status by TMO Officer', max_length=20),
         ),
         migrations.AddField(
             model_name='buyerprofile',

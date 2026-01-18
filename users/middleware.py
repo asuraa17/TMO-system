@@ -34,6 +34,15 @@ class AuthenticationMiddleware:
                     except Exception:
                         return redirect(reverse("tmo:dashboard"))
                 
+                elif role == 'showroom':
+                    try:
+                        showroom = request.user.showroom_profile
+                        if showroom.verification_status == 'pending':
+                            # Allow them to see their dashboard even if pending
+                            pass
+                        return redirect(reverse("showroom:dashboard"))
+                    except Exception:
+                        return redirect(reverse("showroom:dashboard"))
                 else:
                     return redirect(reverse("users:dashboard"))
             else:

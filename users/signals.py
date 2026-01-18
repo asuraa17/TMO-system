@@ -1,7 +1,7 @@
 from django.contrib.auth.models import Group
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
-from .models import User, BuyerProfile
+from .models import User, BuyerProfile, ShowroomProfile
 
 ROLE_GROUPS = {
     #choice = database
@@ -66,4 +66,44 @@ def reset_rejected_status_on_update(sender, instance, **kwargs):
                     instance.verified_at = None
         
         except BuyerProfile.DoesNotExist:
+            pass
+
+
+@receiver(pre_save, sender=ShowroomProfile)
+def reset_rejected_showroom_status_on_update(sender, instance, **kwargs):
+    """
+    Automatically reset verification status to pending when rejected showroom updates profile
+    Only reset if the profile already exists (not on creation) and is currently rejected
+    """
+    if instance.pk:
+        # Check if this is an update (not creation)
+        try:
+            old_instance = ShowroomProfile.objects.get(pk=instance.pk)
+            
+            # If status is rejected and profile data has changed
+            if old_instance.verification_status == 'rejected':
+                # Check if any key fields have changed
+                fields_changed = (
+                    old_instance.showroom_name != instance.showroom_name or
+                    old_instance.registration_number != instance.registration_number or
+                    old_instance.pan_number != instance.pan_number or
+                    old_instance.address != instance.address or
+                    old_instance.phone != instance.phone or
+                    old_instance.alternative_phone != instance.alternative_phone or
+                    old_instance.owner_name != instance.owner_name or
+                    old_instance.owner_citizenship != instance.owner_citizenship or
+                    old_instance.registration_certificate != instance.registration_certificate or
+                    old_instance.pan_certificate != instance.pan_certificate or
+                    old_instance.owner_citizenship_file != instance.owner_citizenship_file or
+                    old_instance.showroom_photo != instance.showroom_photo
+                )
+                
+                # If fields changed, reset verification status
+                if fields_changed:
+                    instance.verification_status = 'pending'
+                    instance.verified_by = None
+                    instance.verification_remarks = ''
+                    instance.verified_at = None
+        
+        except ShowroomProfile.DoesNotExist:
             pass
