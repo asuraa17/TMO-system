@@ -1,7 +1,7 @@
 from django.contrib.auth.models import Group
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
-from .models import User, BuyerProfile, ShowroomProfile
+from .models import User, BuyerProfile, ShowroomProfile, Vehicle
 
 ROLE_GROUPS = {
     #choice = database
@@ -106,4 +106,46 @@ def reset_rejected_showroom_status_on_update(sender, instance, **kwargs):
                     instance.verified_at = None
         
         except ShowroomProfile.DoesNotExist:
+            pass
+
+@receiver(pre_save, sender=Vehicle)
+def reset_rejected_vehicle_status_on_update(sender, instance, **kwargs):
+    """
+    Automatically reset verification status to pending when rejected vehicle is updated
+    Only reset if the vehicle already exists (not on creation) and is currently rejected
+    """
+    if instance.pk:
+        try:
+            old_instance = Vehicle.objects.get(pk=instance.pk)
+            
+            # If status is rejected and vehicle data has changed
+            if old_instance.verification_status == 'rejected':
+                # Check if any key vehicle fields have changed
+                fields_changed = (
+                    old_instance.chassis_number != instance.chassis_number or
+                    old_instance.engine_number != instance.engine_number or
+                    old_instance.make != instance.make or
+                    old_instance.model != instance.model or
+                    old_instance.year != instance.year or
+                    old_instance.color != instance.color or
+                    old_instance.vehicle_type != instance.vehicle_type or
+                    old_instance.fuel_type != instance.fuel_type or
+                    old_instance.engine_cc != instance.engine_cc or
+                    old_instance.seating_capacity != instance.seating_capacity or
+                    old_instance.price != instance.price or
+                    old_instance.photo_front != instance.photo_front or
+                    old_instance.photo_back != instance.photo_back or
+                    old_instance.photo_left != instance.photo_left or
+                    old_instance.photo_right != instance.photo_right or
+                    old_instance.payment_receipt != instance.payment_receipt
+                )
+                
+                # If fields changed, reset verification status
+                if fields_changed:
+                    instance.verification_status = 'pending'
+                    instance.verified_by = None
+                    instance.verification_remarks = ''
+                    instance.verified_at = None
+        
+        except Vehicle.DoesNotExist:
             pass

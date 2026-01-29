@@ -463,6 +463,14 @@
             </div>
             {% endif %}
 
+            <!-- After the verification info section, before the back button -->
+            {% if vehicle.verification_status == 'rejected' %}
+            <div style="margin-top: 20px; padding: 20px; background: #fff3cd; border-radius: 8px; border-left: 4px solid #ffc107;">
+                <p style="color: #856404; margin-bottom: 15px;"><strong>This vehicle was rejected.</strong> You can update the vehicle information and resubmit for verification.</p>
+                <a href="{% url 'showroom:vehicle_update' vehicle.id %}" class="btn btn-primary">Update Vehicle</a>
+            </div>
+            {% endif %}
+
             <div style="margin-top: 30px;">
                 <a href="{% url 'showroom:vehicle_list' %}" class="btn btn-secondary">Back to List</a>
             </div>
