@@ -305,6 +305,16 @@ class VehicleRegistrationForm(forms.ModelForm):
             'payment_receipt': forms.FileInput(attrs={'class': 'form-control', 'accept': '.pdf,.jpg,.jpeg,.png'}),
         }
     
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Make photos not required when updating (only if changing)
+        if self.instance and self.instance.pk:
+            self.fields['photo_front'].required = False
+            self.fields['photo_back'].required = False
+            self.fields['photo_left'].required = False
+            self.fields['photo_right'].required = False
+            self.fields['payment_receipt'].required = False
+    
     def clean_buyer_email(self):
         email = self.cleaned_data.get('buyer_email')
         try:
@@ -324,8 +334,13 @@ class VehicleRegistrationForm(forms.ModelForm):
     
     def clean_chassis_number(self):
         chassis = self.cleaned_data.get('chassis_number')
-        if Vehicle.objects.filter(chassis_number=chassis).exists():
-            raise forms.ValidationError('This chassis number is already registered.')
+        # Exclude current instance when checking for duplicates
+        if self.instance and self.instance.pk:
+            if Vehicle.objects.filter(chassis_number=chassis).exclude(pk=self.instance.pk).exists():
+                raise forms.ValidationError('This chassis number is already registered.')
+        else:
+            if Vehicle.objects.filter(chassis_number=chassis).exists():
+                raise forms.ValidationError('This chassis number is already registered.')
         return chassis
     
     def clean_year(self):
@@ -335,8 +350,7 @@ class VehicleRegistrationForm(forms.ModelForm):
         if year < 1900 or year > current_year + 1:
             raise forms.ValidationError(f'Year must be between 1900 and {current_year + 1}.')
         return year
-
-
+    
 class ShowroomPasswordChangeForm(forms.Form):
     """Form for showroom to change password"""
     

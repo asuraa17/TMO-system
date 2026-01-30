@@ -180,6 +180,8 @@ def showroom_register_submit(request):
 
 @login_required(login_url=reverse_lazy("users:all_login"))
 @user_passes_test(is_showroom, login_url=reverse_lazy("users:dashboard"))
+@login_required(login_url=reverse_lazy("users:all_login"))
+@user_passes_test(is_showroom, login_url=reverse_lazy("users:dashboard"))
 def showroom_dashboard(request):
     """Showroom dashboard"""
     try:
@@ -187,12 +189,11 @@ def showroom_dashboard(request):
     except ShowroomProfile.DoesNotExist:
         messages.error(request, "Showroom profile not found.")
         return redirect("users:dashboard")
-
-    # Get statistics
+    
     total_vehicles = Vehicle.objects.filter(showroom=showroom).count()
-    pending_vehicles = Vehicle.objects.filter(verification_status='pending').count()
-    verified_vehicles = Vehicle.objects.filter(verification_status='verified').count()
-    rejected_vehicles = Vehicle.objects.filter(verification_status='rejected').count()
+    pending_vehicles = Vehicle.objects.filter(showroom=showroom, verification_status='pending').count()
+    verified_vehicles = Vehicle.objects.filter(showroom=showroom, verification_status='verified').count()
+    rejected_vehicles = Vehicle.objects.filter(showroom=showroom, verification_status='rejected').count()
 
     context = {
         "showroom": showroom,
@@ -393,6 +394,54 @@ def vehicle_detail(request, vehicle_id):
 
     return render(request, "showroom/vehicle_detail.html", context)
 
+@login_required(login_url=reverse_lazy("users:all_login"))
+@user_passes_test(is_showroom, login_url=reverse_lazy("users:dashboard"))
+def vehicle_update(request, vehicle_id):
+    """Update a rejected vehicle and resubmit for verification"""
+    try:
+        showroom = request.user.showroom_profile
+    except ShowroomProfile.DoesNotExist:
+        messages.error(request, "Showroom profile not found.")
+        return redirect("users:dashboard")
+
+    # Check if showroom is verified
+    if showroom.verification_status != 'verified':
+        messages.error(request, "Your showroom must be verified to update vehicles.")
+        return redirect("showroom:dashboard")
+
+    # Get vehicle and make sure it belongs to this showroom
+    vehicle = get_object_or_404(Vehicle, id=vehicle_id, showroom=showroom)
+    
+    # Only allow update if vehicle is rejected
+    if vehicle.verification_status != 'rejected':
+        messages.error(request, "Only rejected vehicles can be updated.")
+        return redirect("showroom:vehicle_detail", vehicle_id=vehicle_id)
+
+    if request.method == "POST":
+        form = VehicleRegistrationForm(request.POST, request.FILES, instance=vehicle)
+        if form.is_valid():
+            updated_vehicle = form.save(commit=False)
+            # Note: The signal will automatically reset verification_status to 'pending'
+            updated_vehicle.save()
+
+            messages.success(
+                request,
+                f"Vehicle updated successfully! Resubmitted for verification. Plate: {updated_vehicle.temporary_plate_number}"
+            )
+            return redirect("showroom:vehicle_detail", vehicle_id=vehicle.id)
+    else:
+        # Pre-fill form with existing vehicle data
+        form = VehicleRegistrationForm(instance=vehicle)
+        # Pre-fill buyer email field
+        form.fields['buyer_email'].initial = vehicle.current_owner.user.email
+
+    context = {
+        "form": form,
+        "showroom": showroom,
+        "vehicle": vehicle,
+        "is_update": True,
+    }
+    return render(request, "showroom/vehicle_update.html", context)
 
 @login_required(login_url=reverse_lazy("users:all_login"))
 @user_passes_test(is_showroom, login_url=reverse_lazy("users:dashboard"))
