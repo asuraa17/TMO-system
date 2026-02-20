@@ -170,7 +170,7 @@
 
             <div class="profile-section">
                 <h3>Editable Information</h3>
-                <form method="post">
+                <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
                     
                     <div class="form-group">
@@ -189,6 +189,31 @@
                         {% if form.phone.errors %}
                         <div class="alert-error" style="margin-top: 5px; padding: 8px;">
                             {{ form.phone.errors }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_signature_image">Signature Image</label>
+                        
+                        {% if officer.signature_image %}
+                            <div style="margin-bottom: 10px; padding: 10px; background: #f8f9fa; border-radius: 5px; border: 1px solid #ddd;">
+                                <p style="color: #666; margin-bottom: 8px; font-size: 13px;">Current signature:</p>
+                                <img src="{{ officer.signature_image.url }}" height="60" style="border: 1px solid #ddd; padding: 5px; background: white;">
+                                <p style="color: #999; font-size: 12px; margin-top: 5px;">Upload a new image to replace it</p>
+                            </div>
+                        {% else %}
+                            <div style="margin-bottom: 10px; padding: 10px; background: #fff3cd; border-radius: 5px; border: 1px solid #ffc107;">
+                                <p style="color: #856404; font-size: 13px; margin: 0;">⚠️ No signature uploaded yet. Your signature will appear on verified vehicle certificates.</p>
+                            </div>
+                        {% endif %}
+                        
+                        {{ form.signature_image }}
+                        <small style="color: #666; display: block; margin-top: 5px;">Upload a clear image of your signature (PNG with transparent background recommended)</small>
+                        
+                        {% if form.signature_image.errors %}
+                        <div class="alert-error" style="margin-top: 5px; padding: 8px;">
+                            {{ form.signature_image.errors }}
                         </div>
                         {% endif %}
                     </div>

@@ -29,7 +29,7 @@ def tmo_profile(request):
         return redirect('tmo:dashboard')
     
     if request.method == 'POST':
-        form = TMOOfficerProfileForm(request.POST, instance=officer)
+        form = TMOOfficerProfileForm(request.POST, request.FILES, instance=officer)
         if form.is_valid():
             officer = form.save(commit=False)
             officer.profile_completed = True
