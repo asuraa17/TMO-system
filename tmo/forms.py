@@ -67,7 +67,7 @@ class TMOOfficerProfileForm(forms.ModelForm):
     
     class Meta:
         model = TMOOfficer
-        fields = ['full_name', 'phone']
+        fields = ['full_name', 'phone', 'signature_image']
         widgets = {
             'full_name': forms.TextInput(
                 attrs={
@@ -79,6 +79,12 @@ class TMOOfficerProfileForm(forms.ModelForm):
                 attrs={
                     'class': 'form-control',
                     'placeholder': 'Phone Number'
+                }
+            ),
+            'signature_image': forms.FileInput(
+                attrs={
+                    'class': 'form-control-file',
+                    'accept': 'image/*'
                 }
             ),
         }

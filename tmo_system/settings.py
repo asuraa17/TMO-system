@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -129,3 +130,7 @@ MEDIA_ROOT = BASE_DIR / "media/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTH_USER_MODEL = "users.User"
+
+TMO_VERIFICATION_SECRET = os.environ.get('TMO_SECRET', 'k9mP2xQ7nR4tL8wE')
+TMO_VERIFY_BASE_URL = 'http://127.0.0.1:8000'
+ALLOWED_HOSTS = ['*']  # allows phone to connect

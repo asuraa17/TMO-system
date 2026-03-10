@@ -39,6 +39,8 @@ class TMOOfficer(models.Model):
         help_text="Whether officer has changed default password"
     )
 
+    signature_image = models.ImageField(upload_to='officer_signatures/', blank=True, null=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

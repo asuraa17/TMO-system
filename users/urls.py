@@ -30,4 +30,9 @@ urlpatterns = [
     # Buyer vehicles paths (NEW)
     path("buyer/vehicles/", views.buyer_vehicles, name="buyer_vehicles"),
     path("buyer/vehicles/<int:vehicle_id>/", views.buyer_vehicle_detail, name="buyer_vehicle_detail"),
+
+    # Certificate download (requires login)
+    path("buyer/vehicles/<int:vehicle_id>/download-certificate/", views.download_vehicle_certificate, name="download_vehicle_certificate"),
+    
+    path("verify/", views.verify_certificate_online, name="verify_certificate_online"),
 ]

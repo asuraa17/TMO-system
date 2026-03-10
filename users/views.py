@@ -15,6 +15,12 @@ import uuid
 from django.utils.text import get_valid_filename
 from django.conf import settings
 from django.urls import reverse_lazy
+from django.http import FileResponse, Http404
+import os
+import tempfile
+import hashlib
+from django.views.decorators.http import require_http_methods
+from users.models import Vehicle
 
 
 User = get_user_model()
@@ -535,3 +541,170 @@ def buyer_vehicle_detail(request, vehicle_id):
     }
     
     return render(request, 'users/buyer/vehicle_detail.html', context)
+
+import os
+
+@login_required(login_url=reverse_lazy("users:all_login"))
+@user_passes_test(is_buyer, login_url=reverse_lazy("users:dashboard"))
+def download_vehicle_certificate(request, vehicle_id):
+    """
+    Download vehicle registration certificate PDF
+    Only for verified vehicles owned by the current buyer
+    """
+    try:
+        buyer_profile = request.user.buyer_profile
+    except BuyerProfile.DoesNotExist:
+        raise Http404("Buyer profile not found")
+    
+    # Get vehicle and ensure it belongs to this buyer
+    from users.models import Vehicle
+    vehicle = get_object_or_404(
+        Vehicle, 
+        id=vehicle_id, 
+        current_owner=buyer_profile
+    )
+    
+    # Only allow download for verified vehicles
+    if vehicle.verification_status != 'verified':
+        messages.error(request, "Certificate is only available for verified vehicles.")
+        return redirect('users:buyer_vehicle_detail', vehicle_id=vehicle_id)
+    
+    # Generate PDF
+    try:
+        from users.utils.pdf_generator import generate_vehicle_certificate_pdf
+        
+        # Create temporary file
+        temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.pdf')
+        temp_file.close()
+        
+        # Generate PDF
+        pdf_path = generate_vehicle_certificate_pdf(vehicle, temp_file.name)
+        
+        # Open and return as response
+        pdf_file = open(pdf_path, 'rb')
+        response = FileResponse(
+            pdf_file, 
+            content_type='application/pdf'
+        )
+        
+        # Set filename for download
+        filename = f"Vehicle_Registration_Certificate_{vehicle.permanent_plate_number}_{vehicle.chassis_number}.pdf"
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        
+        # Clean up temp file after response
+        def cleanup():
+            pdf_file.close()
+            try:
+                os.unlink(pdf_path)
+            except:
+                pass
+        
+        # Note: File will be cleaned up when response is sent
+        
+        return response
+        
+    except Exception as e:
+        messages.error(request, f"Error generating certificate: {str(e)}")
+        return redirect('users:buyer_vehicle_detail', vehicle_id=vehicle_id)
+
+def generate_verification_hash(vehicle):
+    """
+    Generate the same hash as in PDF generator
+    SECURITY: Must match exactly for verification to succeed
+    
+    Store in settings.py as TMO_VERIFICATION_SECRET environment variable
+    """
+    hash_input = (
+        f"{vehicle.id}"
+        f"{vehicle.chassis_number}"
+        f"{vehicle.engine_number}"
+        f"{vehicle.verified_at.isoformat()}"
+        f"{vehicle.verified_by.officer_id}"
+        "k9mP2xQ7nR4tL8wE"  
+    )
+    return hashlib.sha256(hash_input.encode()).hexdigest()[:16]
+
+
+@require_http_methods(["GET", "POST"])
+def verify_certificate_online(request):
+    context = {
+        'show_form': True,
+        'verified': None,
+    }
+
+    # Handle both POST (manual form) and GET (QR code scan with params)
+    if request.method == 'POST':
+        data = request.POST
+    elif request.GET.get('certificate_number'):
+        data = request.GET
+    else:
+        # Plain GET with no params — just show the form
+        return render(request, 'users/verify_certificate_online.html', context)
+
+    certificate_number = data.get('certificate_number', '').strip()
+    provided_hash = data.get('verification_hash', '').strip()
+
+    try:
+        if certificate_number.upper().startswith('VRC-'):
+            vehicle_id = int(certificate_number[4:])
+        else:
+            vehicle_id = int(certificate_number)
+    except (ValueError, IndexError):
+        context.update({
+            'show_form': False,
+            'verified': False,
+            'error_message': 'Invalid certificate number format. Expected format: VRC-000002',
+        })
+        return render(request, 'users/verify_certificate_online.html', context)
+
+    try:
+        vehicle = Vehicle.objects.select_related(
+            'current_owner__user',
+            'showroom',
+            'verified_by'
+        ).get(id=vehicle_id)
+
+        if vehicle.verification_status != 'verified':
+            context.update({
+                'show_form': False,
+                'verified': False,
+                'error_message': f'This vehicle is not verified by TMO. Current status: {vehicle.get_verification_status_display()}',
+            })
+            return render(request, 'users/verify_certificate_online.html', context)
+
+        expected_hash = generate_verification_hash(vehicle)
+
+        if provided_hash.lower() == expected_hash.lower():
+            context.update({
+                'show_form': False,
+                'verified': True,
+                'vehicle': vehicle,
+                'owner': vehicle.current_owner,
+                'showroom': vehicle.showroom,
+                'officer': vehicle.verified_by,
+                'verification_hash': expected_hash,
+                'certificate_number': f"VRC-{vehicle.id:06d}",
+            })
+        else:
+            context.update({
+                'show_form': False,
+                'verified': False,
+                'error_message': 'Certificate verification FAILED! The hash does not match our records.',
+                'security_warning': True,
+            })
+            import logging
+            logging.getLogger(__name__).warning(
+                f"Forgery attempt: Vehicle ID {vehicle_id}, "
+                f"provided: {provided_hash}, expected: {expected_hash}, "
+                f"IP: {request.META.get('REMOTE_ADDR', 'unknown')}"
+            )
+
+    except Vehicle.DoesNotExist:
+        context.update({
+            'show_form': False,
+            'verified': False,
+            'error_message': 'Certificate not found in TMO database. This certificate may be forged.',
+            'security_warning': True,
+        })
+
+    return render(request, 'users/verify_certificate_online.html', context)
