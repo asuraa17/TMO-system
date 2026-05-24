@@ -1,394 +1,128 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Certificate Verification - TMO Nepal</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .container {
-            max-width: 650px;
-            width: 100%;
-            background: white;
-            border-radius: 15px;
-            padding: 40px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .logo {
-            font-size: 48px;
-            margin-bottom: 10px;
-        }
-        .header h1 {
-            color: #1a5490;
-            margin-bottom: 5px;
-            font-size: 24px;
-        }
-        .header p {
-            color: #666;
-            font-size: 14px;
-        }
-        .form-container {
-            background: #f8f9fa;
-            padding: 25px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        .form-group label {
-            display: block;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-        .form-group input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: border-color 0.3s;
-        }
-        .form-group input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        .form-group small {
-            display: block;
-            margin-top: 5px;
-            color: #666;
-            font-size: 12px;
-        }
-        .btn-verify {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .btn-verify:hover {
-            transform: translateY(-2px);
-        }
-        .status-badge {
-            text-align: center;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 30px;
-            font-size: 20px;
-            font-weight: bold;
-        }
-        .status-verified {
-            background: #d4edda;
-            color: #155724;
-            border: 3px solid #28a745;
-        }
-        .status-invalid {
-            background: #f8d7da;
-            color: #721c24;
-            border: 3px solid #dc3545;
-        }
-        .info-section {
-            margin-bottom: 25px;
-        }
-        .info-section h3 {
-            color: #1a5490;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #e3f2fd;
-            font-size: 16px;
-        }
-        .info-row {
-            display: flex;
-            padding: 10px 0;
-            border-bottom: 1px solid #f0f0f0;
-        }
-        .info-row:last-child {
-            border-bottom: none;
-        }
-        .info-label {
-            font-weight: bold;
-            color: #555;
-            min-width: 150px;
-            font-size: 14px;
-        }
-        .info-value {
-            color: #333;
-            font-size: 14px;
-        }
-        .verification-badge {
-            display: inline-block;
-            padding: 4px 12px;
-            background: #28a745;
-            color: white;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: bold;
-            margin-left: 10px;
-        }
-        .security-warning {
-            background: #fff3cd;
-            padding: 20px;
-            border-radius: 8px;
-            border-left: 4px solid #ffc107;
-            margin: 20px 0;
-        }
-        .security-warning h4 {
-            color: #856404;
-            margin-bottom: 10px;
-        }
-        .security-warning p {
-            color: #856404;
-            margin: 0;
-            font-size: 14px;
-            line-height: 1.6;
-        }
-        .footer {
-            text-align: center;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 2px solid #f0f0f0;
-            color: #888;
-            font-size: 12px;
-        }
-        .back-link {
-            text-align: center;
-            margin-top: 20px;
-        }
-        .back-link a {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        .back-link a:hover {
-            text-decoration: underline;
-        }
-        .hash-display {
-            background: #f0f0f0;
-            padding: 8px 12px;
-            border-radius: 5px;
-            font-family: 'Courier New', monospace;
-            font-size: 13px;
-            color: #333;
-            border-left: 3px solid #28a745;
-        }
-        .how-to-section {
-            background: #e3f2fd;
-            padding: 20px;
-            border-radius: 10px;
-            margin-top: 20px;
-        }
-        .how-to-section h4 {
-            color: #1565c0;
-            margin-bottom: 15px;
-        }
-        .how-to-section ol {
-            margin-left: 20px;
-            color: #333;
-        }
-        .how-to-section li {
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <div class="logo">🏛️</div>
-            <h1>Government of Nepal</h1>
-            <p>Transport Management Office - Certificate Verification System</p>
-        </div>
+{% extends "users/base_public.html" %}
+{% block title %}Verify Certificate{% endblock %}
+
+{% block content %}
+<div class="public-card" style="max-width:660px; margin: 40px auto;">
+    <div class="public-card-header">
+        <h2>Certificate Verification System</h2>
+        <p>Verify the authenticity of a vehicle registration certificate</p>
+    </div>
+    <div class="public-card-body">
 
         {% if show_form %}
         <!-- VERIFICATION FORM -->
-        <div class="form-container">
-            <h3 style="color: #1a5490; margin-bottom: 20px; text-align: center;">Enter Certificate Details</h3>
-            
-            <form method="POST">
-                {% csrf_token %}
-                
-                <div class="form-group">
-                    <label for="certificate_number">Certificate Number:</label>
-                    <input 
-                        type="text" 
-                        id="certificate_number" 
-                        name="certificate_number" 
-                        placeholder="" 
-                        required
-                        pattern="^(VRC-)?[0-9]+$"
-                        title="Enter format: VRC-000002 or just 2"
-                    >
-                    <small>Format: VRC-000002 (found on the certificate)</small>
-                </div>
-                
-                <div class="form-group">
-                    <label for="verification_hash">Verification Hash:</label>
-                    <input 
-                        type="text" 
-                        id="verification_hash" 
-                        name="verification_hash" 
-                        placeholder="" 
-                        required
-                        minlength="16"
-                        maxlength="16"
-                        pattern="[A-Fa-f0-9]{16}"
-                        title="Must be 16 character hash from QR code"
-                    >
-                    <small>16-character hash (found in QR code or bottom of certificate)</small>
-                </div>
-                
-                <button type="submit" class="btn-verify">🔍 Verify Certificate</button>
-            </form>
+        <div class="notice-box info" style="margin-bottom:20px;">
+            Enter the certificate number and verification hash found on your vehicle registration certificate or QR code.
         </div>
 
-        <div class="how-to-section">
-            <h4>📱 How to Verify a Certificate:</h4>
-            <ol>
+        <form method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <label class="form-label">Certificate Number <span class="req">*</span></label>
+                <input type="text" name="certificate_number" class="form-control"
+                       placeholder="e.g. VRC-000002"
+                       pattern="^(VRC-)?[0-9]+$"
+                       title="Format: VRC-000002 or just the number"
+                       required>
+                <div class="form-hint">Format: VRC-000002 (found on the certificate)</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Verification Hash <span class="req">*</span></label>
+                <input type="text" name="verification_hash" class="form-control"
+                       placeholder="16-character hash code"
+                       minlength="16" maxlength="16"
+                       pattern="[A-Fa-f0-9]{16}"
+                       title="Must be 16-character hash from certificate or QR code"
+                       required>
+                <div class="form-hint">16-character code found in QR code or bottom of certificate</div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block" style="margin-top:4px;">
+                Verify Certificate
+            </button>
+        </form>
+
+        <div style="background:var(--off-white); border:1px solid var(--border); border-radius:8px; padding:18px 20px; margin-top:24px;">
+            <div style="font-family:'Noto Serif',serif; font-size:14px; font-weight:700; color:var(--gov-blue-dark); margin-bottom:12px;">How to Verify a Certificate</div>
+            <ol style="margin-left:18px; font-size:13.5px; color:var(--text-mid); line-height:1.8;">
                 <li>Scan the QR code on the certificate with your phone</li>
                 <li>Copy the <strong>Certificate Number</strong> (e.g., VRC-000002)</li>
                 <li>Copy the <strong>Verification Hash</strong> (16-character code)</li>
                 <li>Enter both above and click "Verify Certificate"</li>
-                <li>System will check if the certificate is authentic</li>
+                <li>System will confirm if the certificate is authentic</li>
             </ol>
         </div>
 
         {% elif verified %}
-        <!-- VERIFIED CERTIFICATE -->
-        <div class="status-badge status-verified">
-            ✓ AUTHENTIC CERTIFICATE VERIFIED
+        <!-- VERIFIED -->
+        <div style="background:var(--success-bg); border:1px solid #a3d9b8; border-left:4px solid var(--success); border-radius:8px; padding:18px 20px; margin-bottom:24px; text-align:center;">
+            <div style="font-family:'Noto Serif',serif; font-size:18px; font-weight:700; color:var(--success);">AUTHENTIC CERTIFICATE VERIFIED</div>
+            <div style="font-size:13px; color:var(--success); margin-top:4px;">This certificate has been cryptographically verified against TMO database records.</div>
         </div>
 
-        <div class="info-section">
-            <h3>Certificate Information</h3>
-            <div class="info-row">
-                <div class="info-label">Certificate No:</div>
-                <div class="info-value">{{ certificate_number }}</div>
-            </div>
-            <div class="info-row">
-                <div class="info-label">Verification Hash:</div>
-                <div class="info-value">
-                    <div class="hash-display">{{ verification_hash }}</div>
-                </div>
-            </div>
-            <div class="info-row">
-                <div class="info-label">Status:</div>
-                <div class="info-value">
-                    <strong style="color: #28a745;">✓ VERIFIED & AUTHENTIC</strong>
-                </div>
-            </div>
+        <!-- Certificate Info -->
+        <div style="background:var(--off-white); border:1px solid var(--border); border-radius:8px; padding:18px 20px; margin-bottom:16px;">
+            <div style="font-family:'Noto Serif',serif; font-size:14px; font-weight:700; color:var(--gov-blue-dark); margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid var(--border);">Certificate Information</div>
+            <div class="readonly-row"><span class="readonly-label">Certificate number: </span><span class="readonly-value" style="font-family:monospace;">{{ certificate_number }}</span></div>
+            <div class="readonly-row"><span class="readonly-label">Verification Hash: </span><span class="readonly-value" style="font-family:monospace; font-size:13px;">{{ verification_hash }}</span></div>
+            <div class="readonly-row"><span class="readonly-label">Status: </span><span class="readonly-value"><span class="badge badge-verified">VERIFIED</span></span></div>
         </div>
 
-        <div class="info-section">
-            <h3>Vehicle Information</h3>
-            <div class="info-row">
-                <div class="info-label">Plate Number:</div>
-                <div class="info-value">{{ vehicle.permanent_plate_number }}</div>
-            </div>
-            <div class="info-row">
-                <div class="info-label">Chassis Number:</div>
-                <div class="info-value">{{ vehicle.chassis_number }}</div>
-            </div>
-            <div class="info-row">
-                <div class="info-label">Engine Number:</div>
-                <div class="info-value">{{ vehicle.engine_number }}</div>
-            </div>
-            <div class="info-row">
-                <div class="info-label">Vehicle:</div>
-                <div class="info-value">{{ vehicle.make }} {{ vehicle.model }} ({{ vehicle.year }})</div>
-            </div>
-            <div class="info-row">
-                <div class="info-label">Color:</div>
-                <div class="info-value">{{ vehicle.color }}</div>
-            </div>
+        <!-- Vehicle Info -->
+        <div style="background:var(--off-white); border:1px solid var(--border); border-radius:8px; padding:18px 20px; margin-bottom:16px;">
+            <div style="font-family:'Noto Serif',serif; font-size:14px; font-weight:700; color:var(--gov-blue-dark); margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid var(--border);">Vehicle Information</div>
+            <div class="readonly-row"><span class="readonly-label">Plate Number: </span><span class="readonly-value" style="font-family:monospace;">{{ vehicle.permanent_plate_number }}</span></div>
+            <div class="readonly-row"><span class="readonly-label">Chassis Number: </span><span class="readonly-value" style="font-family:monospace;">{{ vehicle.chassis_number }}</span></div>
+            <div class="readonly-row"><span class="readonly-label">Engine Number: </span><span class="readonly-value" style="font-family:monospace;">{{ vehicle.engine_number }}</span></div>
+            <div class="readonly-row"><span class="readonly-label">Vehicle: </span><span class="readonly-value">{{ vehicle.make }} {{ vehicle.model }} ({{ vehicle.year }})</span></div>
+            <div class="readonly-row"><span class="readonly-label">Color: </span><span class="readonly-value">{{ vehicle.color }}</span></div>
         </div>
 
-        <div class="info-section">
-            <h3>Registered Owner</h3>
-            <div class="info-row">
-                <div class="info-label">Name:</div>
-                <div class="info-value">
-                    {{ owner.full_name }}
-                    <span class="verification-badge">VERIFIED OWNER</span>
-                </div>
+        <!-- Owner Info -->
+        <div style="background:var(--off-white); border:1px solid var(--border); border-radius:8px; padding:18px 20px; margin-bottom:16px;">
+            <div style="font-family:'Noto Serif',serif; font-size:14px; font-weight:700; color:var(--gov-blue-dark); margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid var(--border);">Registered Owner</div>
+            <div class="readonly-row">
+                <span class="readonly-label">Owner Name:</span>
+                <span class="readonly-value">{{ owner.full_name }}</span>
             </div>
-            <div class="info-row">
-                <div class="info-label">Phone:</div>
-                <div class="info-value">{{ owner.phone }}</div>
-            </div>
+            <div class="readonly-row"><span class="readonly-label">Phone: </span><span class="readonly-value">{{ owner.phone }}</span></div>
         </div>
 
-        <div class="info-section">
-            <h3>TMO Verification</h3>
-            <div class="info-row">
-                <div class="info-label">Verified By:</div>
-                <div class="info-value">{{ officer.full_name }}</div>
-            </div>
-            <div class="info-row">
-                <div class="info-label">Officer ID:</div>
-                <div class="info-value">{{ officer.officer_id }}</div>
-            </div>
-            <div class="info-row">
-                <div class="info-label">Department:</div>
-                <div class="info-value">{{ officer.department }}</div>
-            </div>
-            <div class="info-row">
-                <div class="info-label">Verified Date:</div>
-                <div class="info-value">{{ vehicle.verified_at|date:"F d, Y" }}</div>
-            </div>
+        <!-- TMO Info -->
+        <div style="background:var(--off-white); border:1px solid var(--border); border-radius:8px; padding:18px 20px; margin-bottom:24px;">
+            <div style="font-family:'Noto Serif',serif; font-size:14px; font-weight:700; color:var(--gov-blue-dark); margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid var(--border);">TMO Verification Details</div>
+            <div class="readonly-row"><span class="readonly-label">Verified By: </span><span class="readonly-value">{{ officer.full_name }}</span></div>
+            <div class="readonly-row"><span class="readonly-label">Officer ID: </span><span class="readonly-value">{{ officer.officer_id }}</span></div>
+            <div class="readonly-row"><span class="readonly-label">Department: </span><span class="readonly-value">{{ officer.department }}</span></div>
+            <div class="readonly-row"><span class="readonly-label">Verified Date: </span><span class="readonly-value">{{ vehicle.verified_at|date:"F d, Y" }}</span></div>
         </div>
 
-        <div class="footer">
-            ✅ This certificate has been cryptographically verified against TMO database records. 
-            The hash matches exactly, confirming this is an authentic government-issued document.
-        </div>
+        <a href="{% url 'users:verify_certificate_online' %}" class="btn btn-outline-primary btn-block">Verify Another Certificate</a>
 
         {% else %}
-        <!-- INVALID/FORGED CERTIFICATE -->
-        <div class="status-badge status-invalid">
-            ✗ CERTIFICATE VERIFICATION FAILED
+        <!-- INVALID / FAILED -->
+        <div style="background:var(--danger-bg); border:1px solid #f5c6c2; border-left:4px solid var(--gov-red); border-radius:8px; padding:18px 20px; margin-bottom:24px; text-align:center;">
+            <div style="font-family:'Noto Serif',serif; font-size:18px; font-weight:700; color:var(--danger);">CERTIFICATE VERIFICATION FAILED</div>
         </div>
-        
-        <div class="security-warning">
-            <h4>⚠️ Security Alert</h4>
-            <p>{{ error_message }}</p>
+
+        <div style="background:var(--warning-bg); border:1px solid #f0d080; border-left:4px solid #f59e0b; border-radius:8px; padding:18px 20px; margin-bottom:24px;">
+            <div style="font-weight:700; color:var(--warning); margin-bottom:8px;">Security Alert</div>
+            <p style="color:var(--warning); font-size:13.5px; line-height:1.6;">{{ error_message }}</p>
             {% if security_warning %}
-            <p style="margin-top: 15px;"><strong>Warning:</strong> This certificate could not be verified in the TMO database or the cryptographic hash does not match. This may indicate a forged or tampered document. Please report this to authorities immediately if you suspect fraud.</p>
+            <p style="color:var(--warning); font-size:13.5px; margin-top:10px; line-height:1.6;">
+                <strong>Warning:</strong> This certificate could not be verified in the TMO database or the cryptographic hash does not match. This may indicate a forged or tampered document. Please report this to the authorities immediately if you suspect fraud.
+            </p>
             {% endif %}
         </div>
 
-        <div class="footer">
-            If you believe this is an error, please contact the Transport Management Office 
-            with the certificate number for manual verification.
+        <div style="font-size:13px; color:var(--text-light); text-align:center; margin-bottom:20px;">
+            If you believe this is an error, please contact the Transport Management Office with the certificate number for manual verification.
         </div>
+
+        <a href="{% url 'users:verify_certificate_online' %}" class="btn btn-outline-primary btn-block">Try Again</a>
         {% endif %}
 
-        <div class="back-link">
-            <a href="{% url 'users:verify_certificate_online' %}">← Verify Another Certificate</a>
-        </div>
     </div>
-</body>
-</html>
+</div>
+{% endblock %}

@@ -1,532 +1,114 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Showroom Profile</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f6f9;
-        }
-        .navbar {
-            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-            color: white;
-            padding: 20px 30px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .navbar h1 {
-            font-size: 28px;
-        }
-        .nav-links {
-            display: flex;
-            gap: 15px;
-        }
-        .nav-links a {
-            color: white;
-            text-decoration: none;
-            padding: 8px 20px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 5px;
-        }
-        .nav-links a:hover {
-            background: rgba(255,255,255,0.3);
-        }
-        .container {
-            max-width: 900px;
-            margin: 40px auto;
-            padding: 0 20px;
-        }
-        .profile-card {
-            background: white;
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-        }
-        .profile-card h2 {
-            color: #333;
-            margin-bottom: 10px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #764ba2;
-        }
-        .subtitle {
-            color: #666;
-            margin-bottom: 30px;
-        }
-        .alert {
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        .alert-error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        .alert-warning {
-            background: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeeba;
-        }
-        .locked-notice {
-            background: #e7f3ff;
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 4px solid #007bff;
-            margin-bottom: 30px;
-        }
-        .locked-notice p {
-            color: #004085;
-            margin: 0;
-        }
-        .status-display {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 30px;
-        }
-        .status-display h3 {
-            color: #333;
-            margin-bottom: 15px;
-        }
-        .status-badge {
-            display: inline-block;
-            padding: 8px 20px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: bold;
-        }
-        .status-pending {
-            background: #fff3cd;
-            color: #856404;
-        }
-        .status-verified {
-            background: #d4edda;
-            color: #155724;
-        }
-        .status-rejected {
-            background: #f8d7da;
-            color: #721c24;
-        }
-        .form-section {
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #eee;
-        }
-        .form-section:last-of-type {
-            border-bottom: none;
-        }
-        .form-section h3 {
-            color: #764ba2;
-            margin-bottom: 15px;
-            font-size: 18px;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #333;
-            font-weight: bold;
-        }
-        .form-control {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 14px;
-        }
-        .form-control:focus {
-            outline: none;
-            border-color: #764ba2;
-        }
-        .form-control:disabled {
-            background: #e9ecef;
-            cursor: not-allowed;
-        }
-        .btn {
-            padding: 12px 30px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            text-decoration: none;
-            display: inline-block;
-        }
-        .btn-primary {
-            background: #764ba2;
-            color: white;
-        }
-        .btn-primary:hover {
-            background: #5e3a7e;
-        }
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-            margin-left: 10px;
-        }
-        .btn-secondary:hover {
-            background: #5a6268;
-        }
-        .required {
-            color: red;
-        }
-        .help-text {
-            font-size: 12px;
-            color: #666;
-            margin-top: 5px;
-        }
-        .error-list {
-            color: #721c24;
-            font-size: 14px;
-            margin-top: 5px;
-            list-style: none;
-            padding: 0;
-        }
-        .readonly-info {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 30px;
-        }
-        .readonly-info h3 {
-            color: #333;
-            margin-bottom: 15px;
-        }
-        .info-row {
-            display: flex;
-            padding: 10px 0;
-            border-bottom: 1px solid #eee;
-        }
-        .info-row:last-child {
-            border-bottom: none;
-        }
-        .info-label {
-            font-weight: bold;
-            color: #555;
-            min-width: 200px;
-        }
-        .info-value {
-            color: #333;
-        }
-    </style>
-</head>
-<body>
-    <div class="navbar">
-        <h1>Showroom Profile</h1>
-        <div class="nav-links">
-            <a href="{% url 'showroom:dashboard' %}">Dashboard</a>
-            <a href="{% url 'users:all_logout' %}">Logout</a>
+{% extends "showroom/base.html" %}
+{% block title %}Showroom Profile{% endblock %}
+{% block header_right %}<div class="header-right"><div class="showroom-badge">Showroom: <span>{{ showroom.showroom_name }}</span></div></div>{% endblock %}
+{% block nav_links %}
+<li><a href="{% url 'showroom:dashboard' %}">Dashboard</a></li>
+{% if showroom.verification_status == 'verified' %}<li><a href="{% url 'showroom:vehicle_list' %}">Vehicles</a></li>{% endif %}
+{% endblock %}
+{% block nav_right %}
+<li><a href="{% url 'showroom:profile' %}" class="active">Profile</a></li>
+<li><a href="{% url 'showroom:change_password' %}">Password</a></li>
+<li class="nav-divider"></li>
+<li><a href="{% url 'users:all_logout' %}" class="nav-danger">Logout</a></li>
+{% endblock %}
+{% block content %}
+<div class="page-wrapper" style="max-width:860px;">
+    {% if messages %}{% for message in messages %}<div class="alert alert-{{ message.tags }}">{{ message }}</div>{% endfor %}{% endif %}
+
+    <div class="page-header">
+        <div><h1>Showroom Profile</h1><p>{% if is_verified %}Verified — only account info can be updated{% else %}Update your profile information{% endif %}</p></div>
+        <div style="display:flex; align-items:center; gap:12px;">
+            <span class="badge badge-{{ showroom.verification_status }}">{{ showroom.get_verification_status_display }}</span>
         </div>
     </div>
 
-    <div class="container">
-        {% if messages %}
-            {% for message in messages %}
-            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
+    {% if showroom.verification_status == 'rejected' and showroom.verification_remarks %}
+    <div class="notice-box danger"><strong>Rejection Reason:</strong> {{ showroom.verification_remarks }}</div>
+    {% endif %}
 
-        <div class="profile-card">
-            <h2>Profile Information</h2>
-            <p class="subtitle">
-                {% if is_verified %}
-                    Your showroom is verified. You can only update account information.
-                {% else %}
-                    Update your profile information below.
-                {% endif %}
-            </p>
-
-            <!-- Verification Status -->
-            <div class="status-display">
-                <h3>Verification Status</h3>
-                <span class="status-badge status-{{ showroom.verification_status }}">
-                    {{ showroom.get_verification_status_display }}
-                </span>
-                {% if showroom.verification_status == 'rejected' and showroom.verification_remarks %}
-                <div style="margin-top: 15px; padding: 15px; background: #fff3cd; border-radius: 5px; border-left: 4px solid #ffc107;">
-                    <strong style="color: #856404;">Rejection Reason:</strong>
-                    <p style="color: #856404; margin: 5px 0 0 0;">{{ showroom.verification_remarks }}</p>
-                </div>
-                {% endif %}
+    {% if is_verified %}
+    <div class="notice-box info">Your showroom is verified. Business details are locked. You can only update username and email.</div>
+    <div class="card">
+        <div class="card-header"><h3>Showroom Details (Read-Only)</h3></div>
+        <div class="card-body">
+            <div class="readonly-box" style="margin:0;">
+                <div class="readonly-row"><span class="readonly-label">Showroom Name</span><span class="readonly-value">{{ showroom.showroom_name }}</span></div>
+                <div class="readonly-row"><span class="readonly-label">Registration Number</span><span class="readonly-value">{{ showroom.registration_number }}</span></div>
+                <div class="readonly-row"><span class="readonly-label">PAN Number</span><span class="readonly-value">{{ showroom.pan_number }}</span></div>
+                <div class="readonly-row"><span class="readonly-label">Address</span><span class="readonly-value">{{ showroom.address }}</span></div>
+                <div class="readonly-row"><span class="readonly-label">Phone</span><span class="readonly-value">{{ showroom.phone }}</span></div>
+                {% if showroom.alternative_phone %}<div class="readonly-row"><span class="readonly-label">Alternative Phone</span><span class="readonly-value">{{ showroom.alternative_phone }}</span></div>{% endif %}
+                <div class="readonly-row"><span class="readonly-label">Owner Name</span><span class="readonly-value">{{ showroom.owner_name }}</span></div>
+                <div class="readonly-row"><span class="readonly-label">Owner Citizenship</span><span class="readonly-value">{{ showroom.owner_citizenship }}</span></div>
             </div>
+        </div>
+    </div>
+    {% endif %}
 
-            {% if is_verified %}
-            <div class="locked-notice">
-                <p><strong>Notice:</strong> Your showroom has been verified. Profile details (showroom name, registration number, documents, etc.) are locked. You can only update username, email, first name, and last name.</p>
-            </div>
-            {% endif %}
-
+    <div class="card">
+        <div class="card-header"><h3>{% if is_verified %}Account Information{% else %}Edit Profile{% endif %}</h3></div>
+        <div class="card-body">
             <form method="post" enctype="multipart/form-data">
                 {% csrf_token %}
-
-                <!-- Account Information Section -->
                 <div class="form-section">
                     <h3>Account Information</h3>
-                    
-                    <div class="form-group">
-                        <label for="id_username">Username <span class="required">*</span></label>
-                        {{ form.username }}
-                        {% if form.username.errors %}
-                            <ul class="error-list">
-                                {% for error in form.username.errors %}
-                                <li>{{ error }}</li>
-                                {% endfor %}
-                            </ul>
-                        {% endif %}
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                        <div class="form-group">
+                            <label class="form-label">Username <span class="req">*</span></label>
+                            {{ form.username }}
+                            {% if form.username.errors %}<ul class="error-list">{% for e in form.username.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Email <span class="req">*</span></label>
+                            {{ form.email }}
+                            {% if form.email.errors %}<ul class="error-list">{% for e in form.email.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                        </div>
                     </div>
-
-                    <div class="form-group">
-                        <label for="id_email">Email <span class="required">*</span></label>
-                        {{ form.email }}
-                        {% if form.email.errors %}
-                            <ul class="error-list">
-                                {% for error in form.email.errors %}
-                                <li>{{ error }}</li>
-                                {% endfor %}
-                            </ul>
-                        {% endif %}
-                    </div>
-
                 </div>
 
                 {% if not is_verified %}
-                <!-- Business Information Section (Only for pending/rejected) -->
                 <div class="form-section">
                     <h3>Business Information</h3>
-                    
-                    <div class="form-group">
-                        <label for="id_showroom_name">Showroom Name <span class="required">*</span></label>
-                        {{ form.showroom_name }}
-                        {% if form.showroom_name.errors %}
-                            <ul class="error-list">
-                                {% for error in form.showroom_name.errors %}
-                                <li>{{ error }}</li>
-                                {% endfor %}
-                            </ul>
-                        {% endif %}
-                    </div>
-
-                    <div class="form-group">
-                        <label for="id_registration_number">Registration Number <span class="required">*</span></label>
-                        {{ form.registration_number }}
-                        {% if form.registration_number.errors %}
-                            <ul class="error-list">
-                                {% for error in form.registration_number.errors %}
-                                <li>{{ error }}</li>
-                                {% endfor %}
-                            </ul>
-                        {% endif %}
-                    </div>
-
-                    <div class="form-group">
-                        <label for="id_pan_number">PAN Number <span class="required">*</span></label>
-                        {{ form.pan_number }}
-                        {% if form.pan_number.errors %}
-                            <ul class="error-list">
-                                {% for error in form.pan_number.errors %}
-                                <li>{{ error }}</li>
-                                {% endfor %}
-                            </ul>
-                        {% endif %}
+                    <div class="form-group"><label class="form-label">Showroom Name <span class="req">*</span></label>{{ form.showroom_name }}{% if form.showroom_name.errors %}<ul class="error-list">{% for e in form.showroom_name.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}</div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                        <div class="form-group"><label class="form-label">Registration Number <span class="req">*</span></label>{{ form.registration_number }}{% if form.registration_number.errors %}<ul class="error-list">{% for e in form.registration_number.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}</div>
+                        <div class="form-group"><label class="form-label">PAN Number <span class="req">*</span></label>{{ form.pan_number }}{% if form.pan_number.errors %}<ul class="error-list">{% for e in form.pan_number.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}</div>
                     </div>
                 </div>
-
-                <!-- Contact Information Section -->
                 <div class="form-section">
                     <h3>Contact Information</h3>
-                    
-                    <div class="form-group">
-                        <label for="id_address">Address <span class="required">*</span></label>
-                        {{ form.address }}
-                        {% if form.address.errors %}
-                            <ul class="error-list">
-                                {% for error in form.address.errors %}
-                                <li>{{ error }}</li>
-                                {% endfor %}
-                            </ul>
-                        {% endif %}
-                    </div>
-
-                    <div class="form-group">
-                        <label for="id_phone">Phone Number <span class="required">*</span></label>
-                        {{ form.phone }}
-                        <div class="help-text">10 digits only</div>
-                        {% if form.phone.errors %}
-                            <ul class="error-list">
-                                {% for error in form.phone.errors %}
-                                <li>{{ error }}</li>
-                                {% endfor %}
-                            </ul>
-                        {% endif %}
-                    </div>
-
-                    <div class="form-group">
-                        <label for="id_alternative_phone">Alternative Phone</label>
-                        {{ form.alternative_phone }}
-                        {% if form.alternative_phone.errors %}
-                            <ul class="error-list">
-                                {% for error in form.alternative_phone.errors %}
-                                <li>{{ error }}</li>
-                                {% endfor %}
-                            </ul>
-                        {% endif %}
+                    <div class="form-group"><label class="form-label">Address <span class="req">*</span></label>{{ form.address }}</div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                        <div class="form-group"><label class="form-label">Phone <span class="req">*</span></label>{{ form.phone }}<div class="form-hint">10 digits only</div>{% if form.phone.errors %}<ul class="error-list">{% for e in form.phone.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}</div>
+                        <div class="form-group"><label class="form-label">Alternative Phone</label>{{ form.alternative_phone }}</div>
                     </div>
                 </div>
-
-                <!-- Owner Information Section -->
                 <div class="form-section">
                     <h3>Owner Information</h3>
-                    
-                    <div class="form-group">
-                        <label for="id_owner_name">Owner Name <span class="required">*</span></label>
-                        {{ form.owner_name }}
-                        {% if form.owner_name.errors %}
-                            <ul class="error-list">
-                                {% for error in form.owner_name.errors %}
-                                <li>{{ error }}</li>
-                                {% endfor %}
-                            </ul>
-                        {% endif %}
-                    </div>
-
-                    <div class="form-group">
-                        <label for="id_owner_citizenship">Owner Citizenship Number <span class="required">*</span></label>
-                        {{ form.owner_citizenship }}
-                        {% if form.owner_citizenship.errors %}
-                            <ul class="error-list">
-                                {% for error in form.owner_citizenship.errors %}
-                                <li>{{ error }}</li>
-                                {% endfor %}
-                            </ul>
-                        {% endif %}
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                        <div class="form-group"><label class="form-label">Owner Name <span class="req">*</span></label>{{ form.owner_name }}</div>
+                        <div class="form-group"><label class="form-label">Owner Citizenship <span class="req">*</span></label>{{ form.owner_citizenship }}</div>
                     </div>
                 </div>
-
-                <!-- Documents Section -->
                 <div class="form-section">
                     <h3>Documents</h3>
-                    <p style="color: #666; margin-bottom: 15px; font-size: 14px;">
-                        Leave empty if you don't want to change the document.
-                    </p>
-                    
-                    <div class="form-group">
-                        <label for="id_registration_certificate">Business Registration Certificate</label>
-                        {{ form.registration_certificate }}
-                        {% if form.registration_certificate.errors %}
-                            <ul class="error-list">
-                                {% for error in form.registration_certificate.errors %}
-                                <li>{{ error }}</li>
-                                {% endfor %}
-                            </ul>
-                        {% endif %}
-                    </div>
-
-                    <div class="form-group">
-                        <label for="id_pan_certificate">PAN Certificate</label>
-                        {{ form.pan_certificate }}
-                        {% if form.pan_certificate.errors %}
-                            <ul class="error-list">
-                                {% for error in form.pan_certificate.errors %}
-                                <li>{{ error }}</li>
-                                {% endfor %}
-                            </ul>
-                        {% endif %}
-                    </div>
-
-                    <div class="form-group">
-                        <label for="id_owner_citizenship_file">Owner's Citizenship Document</label>
-                        {{ form.owner_citizenship_file }}
-                        {% if form.owner_citizenship_file.errors %}
-                            <ul class="error-list">
-                                {% for error in form.owner_citizenship_file.errors %}
-                                <li>{{ error }}</li>
-                                {% endfor %}
-                            </ul>
-                        {% endif %}
-                    </div>
-
-                    <div class="form-group">
-                        <label for="id_showroom_photo">Showroom Photo</label>
-                        {{ form.showroom_photo }}
-                        {% if form.showroom_photo.errors %}
-                            <ul class="error-list">
-                                {% for error in form.showroom_photo.errors %}
-                                <li>{{ error }}</li>
-                                {% endfor %}
-                            </ul>
-                        {% endif %}
-                    </div>
-                </div>
-                {% else %}
-                <!-- Read-only information for verified showrooms -->
-                <div class="readonly-info">
-                    <h3>Showroom Details (Read-Only)</h3>
-                    
-                    <div class="info-row">
-                        <div class="info-label">Showroom Name:</div>
-                        <div class="info-value">{{ showroom.showroom_name }}</div>
-                    </div>
-                    <div class="info-row">
-                        <div class="info-label">Registration Number:</div>
-                        <div class="info-value">{{ showroom.registration_number }}</div>
-                    </div>
-                    <div class="info-row">
-                        <div class="info-label">PAN Number:</div>
-                        <div class="info-value">{{ showroom.pan_number }}</div>
-                    </div>
-                    <div class="info-row">
-                        <div class="info-label">Address:</div>
-                        <div class="info-value">{{ showroom.address }}</div>
-                    </div>
-                    <div class="info-row">
-                        <div class="info-label">Phone:</div>
-                        <div class="info-value">{{ showroom.phone }}</div>
-                    </div>
-                    {% if showroom.alternative_phone %}
-                    <div class="info-row">
-                        <div class="info-label">Alternative Phone:</div>
-                        <div class="info-value">{{ showroom.alternative_phone }}</div>
-                    </div>
-                    {% endif %}
-                    <div class="info-row">
-                        <div class="info-label">Owner Name:</div>
-                        <div class="info-value">{{ showroom.owner_name }}</div>
-                    </div>
-                    <div class="info-row">
-                        <div class="info-label">Owner Citizenship:</div>
-                        <div class="info-value">{{ showroom.owner_citizenship }}</div>
+                    <div class="notice-box info" style="margin-bottom:16px;">Leave empty to keep existing documents.</div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                        <div class="form-group"><label class="form-label">Registration Certificate</label>{{ form.registration_certificate }}</div>
+                        <div class="form-group"><label class="form-label">PAN Certificate</label>{{ form.pan_certificate }}</div>
+                        <div class="form-group"><label class="form-label">Owner's Citizenship</label>{{ form.owner_citizenship_file }}</div>
+                        <div class="form-group"><label class="form-label">Showroom Photo</label>{{ form.showroom_photo }}</div>
                     </div>
                 </div>
                 {% endif %}
 
-                {% if form.non_field_errors %}
-                <div class="alert alert-error">
-                    {{ form.non_field_errors }}
-                </div>
-                {% endif %}
-
-                <div class="form-group">
+                {% if form.non_field_errors %}<div class="alert alert-error">{{ form.non_field_errors }}</div>{% endif %}
+                <div style="display:flex; gap:10px;">
                     <button type="submit" class="btn btn-primary">Update Profile</button>
                     <a href="{% url 'showroom:dashboard' %}" class="btn btn-secondary">Cancel</a>
                 </div>
             </form>
         </div>
     </div>
-</body>
-</html>
+</div>
+{% endblock %}

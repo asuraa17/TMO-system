@@ -1,229 +1,90 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Showroom Verification</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f6f9;
-        }
-        .navbar {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            color: white;
-            padding: 20px 30px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .navbar h1 {
-            font-size: 28px;
-        }
-        .nav-links {
-            display: flex;
-            gap: 15px;
-        }
-        .nav-links a {
-            color: white;
-            text-decoration: none;
-            padding: 8px 20px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 5px;
-        }
-        .nav-links a:hover {
-            background: rgba(255,255,255,0.3);
-        }
-        .container {
-            max-width: 1200px;
-            margin: 40px auto;
-            padding: 0 20px;
-        }
-        .filter-bar {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-        .filter-bar label {
-            font-weight: bold;
-            color: #333;
-        }
-        .filter-btn {
-            padding: 10px 20px;
-            border: 2px solid #28a745;
-            background: white;
-            color: #28a745;
-            border-radius: 5px;
-            cursor: pointer;
-            text-decoration: none;
-            font-size: 14px;
-        }
-        .filter-btn:hover {
-            background: #28a745;
-            color: white;
-        }
-        .filter-btn.active {
-            background: #28a745;
-            color: white;
-        }
-        .showrooms-card {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-        .showrooms-card h2 {
-            padding: 20px;
-            border-bottom: 1px solid #eee;
-            color: #333;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th {
-            background: #f8f9fa;
-            padding: 15px;
-            text-align: left;
-            color: #333;
-            font-weight: bold;
-        }
-        td {
-            padding: 15px;
-            border-bottom: 1px solid #eee;
-            color: #666;
-        }
-        tr:hover {
-            background: #f8f9fa;
-        }
-        .status-badge {
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-        .status-pending {
-            background: #fff3cd;
-            color: #856404;
-        }
-        .status-verified {
-            background: #d4edda;
-            color: #155724;
-        }
-        .status-rejected {
-            background: #f8d7da;
-            color: #721c24;
-        }
-        .btn {
-            padding: 8px 15px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 13px;
-            text-decoration: none;
-            display: inline-block;
-        }
-        .btn-primary {
-            background: #28a745;
-            color: white;
-        }
-        .btn-primary:hover {
-            background: #218838;
-        }
-        .no-data {
-            text-align: center;
-            padding: 40px;
-            color: #999;
-        }
-        .alert {
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-    </style>
-</head>
-<body>
-    <div class="navbar">
-        <h1>Showroom Verification</h1>
-        <div class="nav-links">
-            <a href="{% url 'tmo:dashboard' %}">Dashboard</a>
-            <a href="{% url 'tmo:profile' %}">Profile</a>
-            <a href="{% url 'users:all_logout' %}">Logout</a>
+{% extends "tmo/base.html" %}
+
+{% block title %}Showroom Verification{% endblock %}
+
+{% block header_right %}
+<div class="header-right">
+    <div class="officer-badge">Officer: <span>{{ officer.full_name }}</span></div>
+</div>
+{% endblock %}
+
+{% block nav_links %}
+<li><a href="{% url 'tmo:dashboard' %}">Dashboard</a></li>
+<li><a href="{% url 'tmo:buyer_verification_list' %}">Buyers</a></li>
+<li><a href="{% url 'tmo:showroom_verification_list' %}" class="active">Showrooms</a></li>
+<li><a href="{% url 'tmo:vehicle_verification_list' %}">Vehicles</a></li>
+{% endblock %}
+
+{% block nav_right %}
+<li><a href="{% url 'tmo:profile' %}">Profile</a></li>
+<li class="nav-divider"></li>
+<li><a href="{% url 'users:all_logout' %}" class="nav-danger">Logout</a></li>
+{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="page-header">
+        <div>
+            <h1>Showroom Verification</h1>
+            <p>Review and verify showroom registration applications</p>
         </div>
     </div>
 
-    <div class="container">
-        {% if messages %}
-            {% for message in messages %}
-            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-            {% endfor %}
+    <div class="filter-bar">
+        <label>Filter by Status:</label>
+        <a href="?status=pending" class="filter-btn {% if current_status == 'pending' %}active-warning{% endif %}">Pending</a>
+        <a href="?status=verified" class="filter-btn {% if current_status == 'verified' %}active-success{% endif %}">Verified</a>
+        <a href="?status=rejected" class="filter-btn {% if current_status == 'rejected' %}active-danger{% endif %}">Rejected</a>
+        <a href="?status=all" class="filter-btn {% if current_status == 'all' %}active{% endif %}">All</a>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h2>Showroom Registrations</h2>
+            <span class="badge badge-pending">{{ showrooms.count }} record{{ showrooms.count|pluralize }}</span>
+        </div>
+        {% if showrooms %}
+        <table class="gov-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Showroom Name</th>
+                    <th>Reg. Number</th>
+                    <th>Owner</th>
+                    <th>Phone</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for showroom in showrooms %}
+                <tr>
+                    <td style="color:var(--text-light); font-size:12px;">{{ forloop.counter }}</td>
+                    <td style="font-weight:600;">{{ showroom.showroom_name }}</td>
+                    <td>{{ showroom.registration_number }}</td>
+                    <td>{{ showroom.owner_name }}</td>
+                    <td>{{ showroom.phone }}</td>
+                    <td>{{ showroom.created_at|date:"M d, Y" }}</td>
+                    <td><span class="badge badge-{{ showroom.verification_status }}">{{ showroom.get_verification_status_display }}</span></td>
+                    <td><a href="{% url 'tmo:showroom_verification_detail' showroom.id %}" class="btn btn-primary btn-sm">View</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="no-data">
+            <p>No showrooms found with status: <strong>{{ current_status }}</strong></p>
+        </div>
         {% endif %}
-
-        <div class="filter-bar">
-            <label>Filter by Status:</label>
-            <a href="?status=pending" class="filter-btn {% if current_status == 'pending' %}active{% endif %}">Pending</a>
-            <a href="?status=verified" class="filter-btn {% if current_status == 'verified' %}active{% endif %}">Verified</a>
-            <a href="?status=rejected" class="filter-btn {% if current_status == 'rejected' %}active{% endif %}">Rejected</a>
-            <a href="?status=all" class="filter-btn {% if current_status == 'all' %}active{% endif %}">All</a>
-        </div>
-
-        <div class="showrooms-card">
-            <h2>Showroom Registrations ({{ showrooms.count }})</h2>
-            {% if showrooms %}
-            <table>
-                <thead>
-                    <tr>
-                        <th>Showroom Name</th>
-                        <th>Registration Number</th>
-                        <th>Owner</th>
-                        <th>Phone</th>
-                        <th>Registration Date</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for showroom in showrooms %}
-                    <tr>
-                        <td>{{ showroom.showroom_name }}</td>
-                        <td>{{ showroom.registration_number }}</td>
-                        <td>{{ showroom.owner_name }}</td>
-                        <td>{{ showroom.phone }}</td>
-                        <td>{{ showroom.created_at|date:"M d, Y" }}</td>
-                        <td>
-                            <span class="status-badge status-{{ showroom.verification_status }}">
-                                {{ showroom.get_verification_status_display }}
-                            </span>
-                        </td>
-                        <td>
-                            <a href="{% url 'tmo:showroom_verification_detail' showroom.id %}" class="btn btn-primary">View Details</a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            {% else %}
-            <div class="no-data">
-                <p>No showrooms found with status: <strong>{{ current_status }}</strong></p>
-            </div>
-            {% endif %}
-        </div>
     </div>
-</body>
-</html>
+
+</div>
+{% endblock %}

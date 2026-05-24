@@ -1,319 +1,151 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Showroom Dashboard</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f6f9;
-        }
-        .navbar {
-            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-            color: white;
-            padding: 20px 30px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .navbar h1 {
-            font-size: 28px;
-        }
-        .nav-links {
-            display: flex;
-            gap: 15px;
-        }
-        .nav-links a {
-            color: white;
-            text-decoration: none;
-            padding: 8px 20px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 5px;
-        }
-        .nav-links a:hover {
-            background: rgba(255,255,255,0.3);
-        }
-        .container {
-            max-width: 1200px;
-            margin: 40px auto;
-            padding: 0 20px;
-        }
-        .alert {
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        .alert-error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        .alert-warning {
-            background: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeeba;
-        }
-        .welcome-card {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            margin-bottom: 30px;
-        }
-        .welcome-card h2 {
-            color: #333;
-            margin-bottom: 10px;
-        }
-        .welcome-card p {
-            color: #666;
-        }
-        .status-card {
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        .status-card h3 {
-            color: #333;
-            margin-bottom: 15px;
-        }
-        .status-badge {
-            display: inline-block;
-            padding: 10px 25px;
-            border-radius: 25px;
-            font-size: 16px;
-            font-weight: bold;
-            margin: 10px 0;
-        }
-        .status-pending {
-            background: #fff3cd;
-            color: #856404;
-        }
-        .status-verified {
-            background: #d4edda;
-            color: #155724;
-        }
-        .status-rejected {
-            background: #f8d7da;
-            color: #721c24;
-        }
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        .stat-card {
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            border-left: 4px solid #764ba2;
-        }
-        .stat-card h3 {
-            color: #666;
-            font-size: 14px;
-            margin-bottom: 10px;
-        }
-        .stat-card .number {
-            font-size: 36px;
-            font-weight: bold;
-            color: #333;
-        }
-        .actions-card {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .actions-card h2 {
-            color: #333;
-            margin-bottom: 20px;
-        }
-        .action-list {
-            display: grid;
-            gap: 15px;
-        }
-        .action-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 8px;
-        }
-        .action-item h3 {
-            color: #333;
-            font-size: 18px;
-            margin-bottom: 5px;
-        }
-        .action-item p {
-            color: #666;
-            font-size: 14px;
-        }
-        .btn {
-            padding: 10px 25px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-            text-decoration: none;
-            display: inline-block;
-        }
-        .btn-primary {
-            background: #764ba2;
-            color: white;
-        }
-        .btn-primary:hover {
-            background: #5e3a7e;
-        }
-        .btn-disabled {
-            background: #ccc;
-            color: #666;
-            cursor: not-allowed;
-        }
-        .locked-notice {
-            background: #e7f3ff;
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 4px solid #007bff;
-            margin-bottom: 20px;
-        }
-    </style>
-</head>
-<body>
-    <div class="navbar">
-        <h1>Showroom Dashboard</h1>
-        <div class="nav-links">
-            <a href="{% url 'showroom:profile' %}">Profile</a>
-            <a href="{% url 'users:all_logout' %}">Logout</a>
+{% extends "showroom/base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+.status-border-verified { border-left: 4px solid var(--success) !important; }
+.status-border-pending  { border-left: 4px solid #f59e0b !important; }
+.status-border-rejected { border-left: 4px solid var(--gov-red) !important; }
+</style>
+{% endblock %}
+
+{% block header_right %}
+<div class="header-right">
+    <div class="showroom-badge">Showroom: <span>{{ showroom.showroom_name }}</span></div>
+    <div class="showroom-badge">Reg: <span>{{ showroom.registration_number }}</span></div>
+</div>
+{% endblock %}
+
+{% block nav_links %}
+<li><a href="{% url 'showroom:dashboard' %}" class="active">Dashboard</a></li>
+{% if showroom.verification_status == 'verified' %}
+<li><a href="{% url 'showroom:vehicle_list' %}">Vehicles</a></li>
+<li><a href="{% url 'showroom:vehicle_register' %}">Register Vehicle</a></li>
+{% endif %}
+{% endblock %}
+
+{% block nav_right %}
+<li><a href="{% url 'showroom:profile' %}">Profile</a></li>
+<li><a href="{% url 'showroom:change_password' %}">Password</a></li>
+<li class="nav-divider"></li>
+<li><a href="{% url 'users:all_logout' %}" class="nav-danger">Logout</a></li>
+{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="page-header">
+        <div>
+            <h1>Welcome, {{ showroom.showroom_name }}</h1>
+            <p>Registration: {{ showroom.registration_number }} &nbsp;·&nbsp; Owner: {{ showroom.owner_name }}</p>
         </div>
     </div>
 
-    <div class="container">
-        {% if messages %}
-            {% for message in messages %}
-            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-
-        <div class="welcome-card">
-            <h2>Welcome, {{ showroom.showroom_name }}!</h2>
-            <p>Registration Number: {{ showroom.registration_number }} | Owner: {{ showroom.owner_name }}</p>
-        </div>
-
-        <!-- Verification Status Card -->
-        <div class="status-card">
-            <h3>Showroom Verification Status</h3>
-            <span class="status-badge status-{{ showroom.verification_status }}">
-                {{ showroom.get_verification_status_display }}
-            </span>
-            
-            {% if showroom.verification_status == 'pending' %}
-                <p style="margin-top: 15px; color: #666;">Your showroom is under review by TMO officers.</p>
-            {% elif showroom.verification_status == 'verified' %}
-                <p style="margin-top: 15px; color: #155724;">Your showroom has been verified! You can now register vehicles.</p>
-            {% elif showroom.verification_status == 'rejected' %}
-                <p style="margin-top: 15px; color: #721c24;">Your showroom registration was rejected. Please contact support.</p>
-                {% if showroom.verification_remarks %}
-                    <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-top: 15px; border-left: 4px solid #ffc107;">
-                        <strong style="color: #856404;">Rejection Reason:</strong>
-                        <p style="color: #856404; margin: 5px 0 0 0;">{{ showroom.verification_remarks }}</p>
-                    </div>
-                {% endif %}
+    <!-- Verification Status -->
+    <div class="card status-border-{{ showroom.verification_status }}">
+        <div class="card-body" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+            <div>
+                <div style="font-size:12px; font-weight:600; color:var(--text-light); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px;">
+                    Showroom Verification Status
+                </div>
+                <span class="badge badge-{{ showroom.verification_status }}" style="font-size:14px; padding:6px 18px;">
+                    {{ showroom.get_verification_status_display }}
+                </span>
+                <div style="margin-top:10px; font-size:13.5px; color:var(--text-mid);">
+                    {% if showroom.verification_status == 'pending' %}
+                        Your showroom is under review by TMO officers.
+                    {% elif showroom.verification_status == 'verified' %}
+                        Verified! You can now register vehicles.
+                    {% elif showroom.verification_status == 'rejected' %}
+                        Rejected. Please update your profile and resubmit.
+                    {% endif %}
+                </div>
+            </div>
+            {% if showroom.verification_status == 'rejected' %}
+            <a href="{% url 'showroom:profile' %}" class="btn btn-danger">Update & Resubmit</a>
             {% endif %}
         </div>
-
-        {% if showroom.verification_status == 'verified' %}
-        <!-- Statistics -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <h3>Total Vehicles</h3>
-                <div class="number">{{ total_vehicles }}</div>
-            </div>
-            <div class="stat-card" style="border-left-color: #ffc107;">
-                <h3>Pending Verification</h3>
-                <div class="number">{{ pending_vehicles }}</div>
-            </div>
-            <div class="stat-card" style="border-left-color: #28a745;">
-                <h3>Verified Vehicles</h3>
-                <div class="number">{{ verified_vehicles }}</div>
-            </div>
-        </div>
-
-        <!-- Actions -->
-        <div class="actions-card">
-            <h2>Quick Actions</h2>
-            <div class="action-list">
-                <div class="action-item">
-                    <div>
-                        <h3>Register New Vehicle</h3>
-                        <p>Register a new vehicle for a verified buyer</p>
-                    </div>
-                    <a href="{% url 'showroom:vehicle_register' %}" class="btn btn-primary">Register Vehicle</a>
-                </div>
-                <div class="action-item">
-                    <div>
-                        <h3>View All Vehicles</h3>
-                        <p>View and manage all registered vehicles</p>
-                    </div>
-                    <a href="{% url 'showroom:vehicle_list' %}" class="btn btn-primary">View Vehicles</a>
-                </div>
-                <div class="action-item">
-                    <div>
-                        <h3>My Profile</h3>
-                        <p>View and update your showroom profile</p>
-                    </div>
-                    <a href="{% url 'showroom:profile' %}" class="btn btn-primary">View Profile</a>
-                </div>
-                <div class="action-item">
-                    <div>
-                        <h3>Change Password</h3>
-                        <p>Update your account password</p>
-                    </div>
-                    <a href="{% url 'showroom:change_password' %}" class="btn btn-primary">Change Password</a>
-                </div>
-            </div>
-        </div>
-        {% else %}
-        <!-- Locked Actions -->
-        <div class="actions-card">
-            <h2>Available Actions</h2>
-            <div class="locked-notice">
-                <p><strong>Notice:</strong> You must be verified before you can register vehicles. Please wait for TMO officer approval.</p>
-            </div>
-            <div class="action-list">
-                <div class="action-item">
-                    <div>
-                        <h3>Register New Vehicle</h3>
-                        <p>Requires verification</p>
-                    </div>
-                    <button class="btn btn-disabled" disabled>Locked</button>
-                </div>
-                <div class="action-item">
-                    <div>
-                        <h3>Change Password</h3>
-                        <p>Update your account password</p>
-                    </div>
-                    <a href="{% url 'showroom:change_password' %}" class="btn btn-primary">Change Password</a>
-                </div>
-            </div>
+        {% if showroom.verification_status == 'rejected' and showroom.verification_remarks %}
+        <div style="border-top:1px solid var(--border); padding:14px 24px; background:var(--danger-bg);">
+            <strong style="font-size:13px; color:var(--danger);">Rejection Reason:</strong>
+            <p style="font-size:13.5px; color:var(--danger); margin-top:4px;">{{ showroom.verification_remarks }}</p>
         </div>
         {% endif %}
     </div>
-</body>
-</html>
+
+    {% if showroom.verification_status == 'verified' %}
+    <!-- Stats -->
+    <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);">
+        <div class="stat-card primary">
+            <h3>Total Vehicles</h3>
+            <div class="number">{{ total_vehicles }}</div>
+        </div>
+        <div class="stat-card warning">
+            <h3>Pending</h3>
+            <div class="number">{{ pending_vehicles }}</div>
+            <div class="stat-label">Awaiting TMO</div>
+        </div>
+        <div class="stat-card success">
+            <h3>Verified</h3>
+            <div class="number">{{ verified_vehicles }}</div>
+            <div class="stat-label">Approved</div>
+        </div>
+        <div class="stat-card danger">
+            <h3>Rejected</h3>
+            <div class="number">{{ rejected_vehicles }}</div>
+            <div class="stat-label">Needs update</div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="card">
+        <div class="card-header"><h2>Quick Actions</h2></div>
+        <div class="card-body" style="padding:16px;">
+            <div style="display:grid; gap:10px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:14px 18px; background:var(--off-white); border:1px solid var(--border); border-radius:6px;">
+                    <div>
+                        <div style="font-weight:600; font-size:14px;">Register New Vehicle</div>
+                        <div style="font-size:12.5px; color:var(--text-light);">Register a vehicle for a verified buyer</div>
+                    </div>
+                    <a href="{% url 'showroom:vehicle_register' %}" class="btn btn-primary btn-sm">Register</a>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:14px 18px; background:var(--off-white); border:1px solid var(--border); border-radius:6px;">
+                    <div>
+                        <div style="font-weight:600; font-size:14px;">View All Vehicles</div>
+                        <div style="font-size:12.5px; color:var(--text-light);">Manage all registered vehicles — {{ total_vehicles }} total</div>
+                    </div>
+                    <a href="{% url 'showroom:vehicle_list' %}" class="btn btn-outline-primary btn-sm">View</a>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:14px 18px; background:var(--off-white); border:1px solid var(--border); border-radius:6px;">
+                    <div>
+                        <div style="font-weight:600; font-size:14px;">My Profile</div>
+                        <div style="font-size:12.5px; color:var(--text-light);">View and update your showroom profile</div>
+                    </div>
+                    <a href="{% url 'showroom:profile' %}" class="btn btn-outline-primary btn-sm">Profile</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% else %}
+    <div class="card">
+        <div class="card-header"><h2>Available Actions</h2></div>
+        <div class="card-body">
+            <div class="notice-box info">
+                Vehicle registration is locked until your showroom is verified by a TMO officer.
+            </div>
+            <div style="display:flex; gap:10px;">
+                <a href="{% url 'showroom:profile' %}" class="btn btn-primary">View Profile</a>
+                <a href="{% url 'showroom:change_password' %}" class="btn btn-outline-primary">Change Password</a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}
