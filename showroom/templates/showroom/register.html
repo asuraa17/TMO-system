@@ -1,283 +1,136 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Showroom Registration</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        .container {
-            max-width: 700px;
-            margin: 0 auto;
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-        }
-        h1 {
-            margin-bottom: 10px;
-            color: #333;
-        }
-        .subtitle {
-            margin-bottom: 30px;
-            color: #666;
-        }
-        .form-section {
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #f0f0f0;
-        }
-        .form-section:last-of-type {
-            border-bottom: none;
-        }
-        .form-section h2 {
-            color: #764ba2;
-            margin-bottom: 20px;
-            font-size: 20px;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        label {
-            display: block;
-            margin-bottom: 6px;
-            color: #333;
-            font-weight: bold;
-        }
-        input[type="text"],
-        input[type="email"],
-        textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-        input[type="file"] {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-        textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-        .btn {
-            background-color: #764ba2;
-            color: white;
-            padding: 12px 30px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            width: 100%;
-        }
-        .btn:hover {
-            background-color: #5e3a7e;
-        }
-        .error {
-            color: red;
-            background: #fee;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
-        .login-link {
-            margin-top: 20px;
-            text-align: center;
-            color: #666;
-        }
-        .login-link a {
-            color: #764ba2;
-            text-decoration: none;
-        }
-        .required {
-            color: red;
-        }
-        .help-text {
-            font-size: 12px;
-            color: #666;
-            margin-top: 5px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Showroom Registration</h1>
-        <p class="subtitle">Register your showroom to start managing vehicle registrations</p>
+{% extends "users/base_public.html" %}
+{% block title %}Showroom Registration{% endblock %}
+{% block content %}
+<div class="public-card" style="max-width:720px; margin:40px auto;">
+    <div class="public-card-header">
+        <h2>Showroom Registration</h2>
+        <p>Register your showroom to start managing vehicle registrations</p>
+    </div>
+    <div class="public-card-body">
 
-        {% if messages %}
-        {% for message in messages %}
-        <div class="error">{{ message }}</div>
-        {% endfor %}
-        {% endif %}
+        {% if messages %}{% for message in messages %}<div class="alert alert-{{ message.tags }}">{{ message }}</div>{% endfor %}{% endif %}
 
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
 
-            <!-- Business Information -->
+            <!-- Business Info -->
             <div class="form-section">
-                <h2>Business Information</h2>
-                
+                <h3>Business Information</h3>
                 <div class="form-group">
-                    <label for="{{ form.showroom_name.id_for_label }}">Showroom Name <span class="required">*</span></label>
+                    <label class="form-label">Showroom Name <span class="req">*</span></label>
                     {{ form.showroom_name }}
-                    {% if form.showroom_name.errors %}
-                    <div class="error">{{ form.showroom_name.errors }}</div>
-                    {% endif %}
+                    {% if form.showroom_name.errors %}<ul class="error-list">{% for e in form.showroom_name.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
                 </div>
-
-                <div class="form-group">
-                    <label for="{{ form.registration_number.id_for_label }}">Business Registration Number <span class="required">*</span></label>
-                    {{ form.registration_number }}
-                    {% if form.registration_number.errors %}
-                    <div class="error">{{ form.registration_number.errors }}</div>
-                    {% endif %}
-                </div>
-
-                <div class="form-group">
-                    <label for="{{ form.pan_number.id_for_label }}">PAN Number <span class="required">*</span></label>
-                    {{ form.pan_number }}
-                    {% if form.pan_number.errors %}
-                    <div class="error">{{ form.pan_number.errors }}</div>
-                    {% endif %}
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                    <div class="form-group">
+                        <label class="form-label">Registration Number <span class="req">*</span></label>
+                        {{ form.registration_number }}
+                        {% if form.registration_number.errors %}<ul class="error-list">{% for e in form.registration_number.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">PAN Number <span class="req">*</span></label>
+                        {{ form.pan_number }}
+                        {% if form.pan_number.errors %}<ul class="error-list">{% for e in form.pan_number.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                    </div>
                 </div>
             </div>
 
-            <!-- Contact Information -->
+            <!-- Contact Info -->
             <div class="form-section">
-                <h2>Contact Information</h2>
-                
+                <h3>Contact Information</h3>
                 <div class="form-group">
-                    <label for="{{ form.address.id_for_label }}">Showroom Address <span class="required">*</span></label>
+                    <label class="form-label">Showroom Address <span class="req">*</span></label>
                     {{ form.address }}
-                    {% if form.address.errors %}
-                    <div class="error">{{ form.address.errors }}</div>
-                    {% endif %}
+                    {% if form.address.errors %}<ul class="error-list">{% for e in form.address.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
                 </div>
-
-                <div class="form-group">
-                    <label for="{{ form.phone.id_for_label }}">Primary Phone Number <span class="required">*</span></label>
-                    {{ form.phone }}
-                    <div class="help-text">10 digits only</div>
-                    {% if form.phone.errors %}
-                    <div class="error">{{ form.phone.errors }}</div>
-                    {% endif %}
-                </div>
-
-                <div class="form-group">
-                    <label for="{{ form.alternative_phone.id_for_label }}">Alternative Phone Number</label>
-                    {{ form.alternative_phone }}
-                    {% if form.alternative_phone.errors %}
-                    <div class="error">{{ form.alternative_phone.errors }}</div>
-                    {% endif %}
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                    <div class="form-group">
+                        <label class="form-label">Primary Phone <span class="req">*</span></label>
+                        {{ form.phone }}
+                        <div class="form-hint">10 digits only</div>
+                        {% if form.phone.errors %}<ul class="error-list">{% for e in form.phone.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Alternative Phone</label>
+                        {{ form.alternative_phone }}
+                    </div>
                 </div>
             </div>
 
-            <!-- Owner Information -->
+            <!-- Owner Info -->
             <div class="form-section">
-                <h2>Owner Information</h2>
-                
-                <div class="form-group">
-                    <label for="{{ form.owner_name.id_for_label }}">Owner Full Name <span class="required">*</span></label>
-                    {{ form.owner_name }}
-                    {% if form.owner_name.errors %}
-                    <div class="error">{{ form.owner_name.errors }}</div>
-                    {% endif %}
-                </div>
-
-                <div class="form-group">
-                    <label for="{{ form.owner_citizenship.id_for_label }}">Owner Citizenship Number <span class="required">*</span></label>
-                    {{ form.owner_citizenship }}
-                    {% if form.owner_citizenship.errors %}
-                    <div class="error">{{ form.owner_citizenship.errors }}</div>
-                    {% endif %}
+                <h3>Owner Information</h3>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                    <div class="form-group">
+                        <label class="form-label">Owner Full Name <span class="req">*</span></label>
+                        {{ form.owner_name }}
+                        {% if form.owner_name.errors %}<ul class="error-list">{% for e in form.owner_name.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Owner Citizenship Number <span class="req">*</span></label>
+                        {{ form.owner_citizenship }}
+                        {% if form.owner_citizenship.errors %}<ul class="error-list">{% for e in form.owner_citizenship.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                    </div>
                 </div>
             </div>
 
             <!-- Documents -->
             <div class="form-section">
-                <h2>Required Documents</h2>
-                
+                <h3>Required Documents</h3>
                 <div class="form-group">
-                    <label for="{{ form.registration_certificate.id_for_label }}">Business Registration Certificate <span class="required">*</span></label>
+                    <label class="form-label">Business Registration Certificate <span class="req">*</span></label>
                     {% if request.session.showroom_file_names.registration_certificate %}
-                    <p style="color: #28a745; margin-bottom: 5px;">✓ Previously uploaded: {{ request.session.showroom_file_names.registration_certificate }}</p>
+                    <div style="padding:8px 12px; background:var(--success-bg); border-radius:5px; font-size:13px; color:var(--success); margin-bottom:8px;">{{ request.session.showroom_file_names.registration_certificate }}</div>
                     {% endif %}
                     {{ form.registration_certificate }}
-                    {% if form.registration_certificate.errors %}
-                    <div class="error">{{ form.registration_certificate.errors }}</div>
-                    {% endif %}
+                    {% if form.registration_certificate.errors %}<ul class="error-list">{% for e in form.registration_certificate.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
                 </div>
-
                 <div class="form-group">
-                    <label for="{{ form.pan_certificate.id_for_label }}">PAN Registration Certificate <span class="required">*</span></label>
+                    <label class="form-label">PAN Registration Certificate <span class="req">*</span></label>
                     {% if request.session.showroom_file_names.pan_certificate %}
-                    <p style="color: #28a745; margin-bottom: 5px;">✓ Previously uploaded: {{ request.session.showroom_file_names.pan_certificate }}</p>
+                    <div style="padding:8px 12px; background:var(--success-bg); border-radius:5px; font-size:13px; color:var(--success); margin-bottom:8px;">{{ request.session.showroom_file_names.pan_certificate }}</div>
                     {% endif %}
                     {{ form.pan_certificate }}
-                    {% if form.pan_certificate.errors %}
-                    <div class="error">{{ form.pan_certificate.errors }}</div>
-                    {% endif %}
+                    {% if form.pan_certificate.errors %}<ul class="error-list">{% for e in form.pan_certificate.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
                 </div>
-
-                <div class="form-group">
-                    <label for="{{ form.owner_citizenship_file.id_for_label }}">Owner's Citizenship Document <span class="required">*</span></label>
-                    {% if request.session.showroom_file_names.owner_citizenship_file %}
-                    <p style="color: #28a745; margin-bottom: 5px;">✓ Previously uploaded: {{ request.session.showroom_file_names.owner_citizenship_file }}</p>
-                    {% endif %}
-                    {{ form.owner_citizenship_file }}
-                    {% if form.owner_citizenship_file.errors %}
-                    <div class="error">{{ form.owner_citizenship_file.errors }}</div>
-                    {% endif %}
-                </div>
-
-                <div class="form-group">
-                    <label for="{{ form.showroom_photo.id_for_label }}">Showroom Photo <span class="required">*</span></label>
-                    {% if request.session.showroom_file_names.showroom_photo %}
-                    <p style="color: #28a745; margin-bottom: 5px;">✓ Previously uploaded: {{ request.session.showroom_file_names.showroom_photo }}</p>
-                    {% endif %}
-                    {{ form.showroom_photo }}
-                    {% if form.showroom_photo.errors %}
-                    <div class="error">{{ form.showroom_photo.errors }}</div>
-                    {% endif %}
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                    <div class="form-group">
+                        <label class="form-label">Owner's Citizenship Document <span class="req">*</span></label>
+                        {% if request.session.showroom_file_names.owner_citizenship_file %}
+                        <div style="padding:8px 12px; background:var(--success-bg); border-radius:5px; font-size:13px; color:var(--success); margin-bottom:8px;">{{ request.session.showroom_file_names.owner_citizenship_file }}</div>
+                        {% endif %}
+                        {{ form.owner_citizenship_file }}
+                        {% if form.owner_citizenship_file.errors %}<ul class="error-list">{% for e in form.owner_citizenship_file.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Showroom Photo <span class="req">*</span></label>
+                        {% if request.session.showroom_file_names.showroom_photo %}
+                        <div style="padding:8px 12px; background:var(--success-bg); border-radius:5px; font-size:13px; color:var(--success); margin-bottom:8px;">{{ request.session.showroom_file_names.showroom_photo }}</div>
+                        {% endif %}
+                        {{ form.showroom_photo }}
+                        {% if form.showroom_photo.errors %}<ul class="error-list">{% for e in form.showroom_photo.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                    </div>
                 </div>
             </div>
 
-            <!-- Account Information -->
+            <!-- Account -->
             <div class="form-section">
-                <h2>Account Information</h2>
-                
+                <h3>Account Information</h3>
                 <div class="form-group">
-                    <label for="{{ form.email.id_for_label }}">Email Address <span class="required">*</span></label>
+                    <label class="form-label">Email Address <span class="req">*</span></label>
                     {{ form.email }}
-                    {% if form.email.errors %}
-                    <div class="error">{{ form.email.errors }}</div>
-                    {% endif %}
+                    {% if form.email.errors %}<ul class="error-list">{% for e in form.email.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
                 </div>
             </div>
 
-            {% if form.non_field_errors %}
-            <div class="error">{{ form.non_field_errors }}</div>
-            {% endif %}
+            {% if form.non_field_errors %}<div class="alert alert-error">{{ form.non_field_errors }}</div>{% endif %}
 
-            <button type="submit" class="btn">Continue to Preview</button>
+            <button type="submit" class="btn btn-primary btn-block">Continue to Preview</button>
         </form>
 
-        <div class="login-link">
-            Already have an account? <a href="{% url 'users:all_login' %}">Login here</a>
+        <div style="text-align:center; margin-top:16px; font-size:13.5px; color:var(--text-light);">
+            Already have an account? <a href="{% url 'users:all_login' %}" style="color:var(--gov-blue); font-weight:600; text-decoration:none;">Login here</a>
         </div>
     </div>
-</body>
-</html>
+</div>
+{% endblock %}

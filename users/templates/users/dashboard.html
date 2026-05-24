@@ -1,180 +1,114 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f6f9;
-        }
-        .navbar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px 30px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .navbar h1 {
-            font-size: 28px;
-            margin-bottom: 5px;
-        }
-        .navbar p {
-            opacity: 0.9;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 40px auto;
-            padding: 0 20px;
-        }
-        .user-card {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-        }
-        .user-card h2 {
-            color: #333;
-            margin-bottom: 20px;
-        }
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-        }
-        .info-item {
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 5px;
-        }
-        .info-label {
-            font-size: 12px;
-            color: #666;
-            text-transform: uppercase;
-            margin-bottom: 5px;
-        }
-        .info-value {
-            font-size: 18px;
-            color: #333;
-            font-weight: bold;
-        }
-        .actions {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-        }
-        .action-card {
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            text-align: center;
-            transition: transform 0.2s;
-        }
-        .action-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-        }
-        .action-card .icon {
-            font-size: 50px;
-            margin-bottom: 15px;
-        }
-        .action-card h3 {
-            color: #333;
-            margin-bottom: 10px;
-        }
-        .action-card p {
-            color: #666;
-            font-size: 14px;
-            margin-bottom: 15px;
-        }
-        .btn {
-            display: inline-block;
-            padding: 10px 25px;
-            background: #667eea;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            transition: background 0.3s;
-        }
-        .btn:hover {
-            background: #5568d3;
-        }
-    </style>
-</head>
-<body>
-    <div class="navbar">
-        <h1>TMO System Dashboard</h1>
-        <p>Transport Management Office</p>
+{% extends "users/base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block header_right %}
+<div class="header-right">
+    <div class="user-badge">User: <span>{{ user.username }}</span></div>
+    <div class="user-badge">Role: <span>{{ role }}</span></div>
+</div>
+{% endblock %}
+
+{% block nav_links %}
+<li><a href="{% url 'users:dashboard' %}" class="active">Dashboard</a></li>
+{% if user.role == 'tmo_officer' %}
+<li><a href="{% url 'tmo:dashboard' %}">TMO Dashboard</a></li>
+<li><a href="{% url 'tmo:profile' %}">TMO Profile</a></li>
+{% endif %}
+{% endblock %}
+
+{% block nav_right %}
+<li><a href="/admin/">Admin Panel</a></li>
+<li class="nav-divider"></li>
+<li><a href="{% url 'users:all_logout' %}" class="nav-danger">Logout</a></li>
+{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+
+    <div class="page-header">
+        <div>
+            <h1>Welcome, {{ user.username }}</h1>
+            <p>General system dashboard — {{ role }}</p>
+        </div>
     </div>
 
-    <div class="container">
-        <div class="user-card">
-            <h2>Welcome, {{ user.username }}!</h2>
-            
+    <!-- User Info -->
+    <div class="card">
+        <div class="card-header"><h2>Account Information</h2></div>
+        <div class="card-body">
             <div class="info-grid">
                 <div class="info-item">
-                    <div class="info-label">Role</div>
-                    <div class="info-value">{{ role }}</div>
+                    <label>Username</label>
+                    <div class="value">{{ user.username }}</div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">Email</div>
-                    <div class="info-value">{{ user.email }}</div>
+                    <label>Role</label>
+                    <div class="value">{{ role }}</div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">Status</div>
-                    <div class="info-value">
+                    <label>Email</label>
+                    <div class="value">{{ user.email }}</div>
+                </div>
+                <div class="info-item">
+                    <label>Account Status</label>
+                    <div class="value">
                         {% if user.is_active %}
-                        Active
+                        <span class="badge badge-verified">Active</span>
                         {% else %}
-                        Inactive
+                        <span class="badge badge-rejected">Inactive</span>
                         {% endif %}
                     </div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">Member Since</div>
-                    <div class="info-value">{{ user.date_joined|date:"M Y" }}</div>
+                    <label>Member Since</label>
+                    <div class="value">{{ user.date_joined|date:"F d, Y" }}</div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="actions">
-            {% if user.role == 'tmo_officer' %}
-            <div class="action-card">
-                <div class="icon">Dashboard icon</div>
-                <h3>TMO Dashboard</h3>
-                <p>Access the TMO Officer dashboard for vehicle management</p>
-                <a href="{% url 'tmo:dashboard' %}" class="btn">Go to TMO Dashboard</a>
-            </div>
+    <!-- Actions -->
+    <div class="card">
+        <div class="card-header"><h2>Quick Actions</h2></div>
+        <div class="card-body" style="padding:16px;">
+            <div style="display:grid; gap:10px;">
 
-            <div class="action-card">
-                <div class="icon">Profile icon</div>
-                <h3>TMO Profile</h3>
-                <p>Access the TMO Officer profile for vehicle management</p>
-                <a href="{% url 'tmo:profile' %}" class="btn">Go to TMO Profile</a>
-            </div>
-            {% endif %}
+                {% if user.role == 'tmo_officer' %}
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:14px 18px; background:var(--off-white); border:1px solid var(--border); border-radius:6px;">
+                    <div>
+                        <div style="font-weight:600; font-size:14px;">TMO Dashboard</div>
+                        <div style="font-size:12.5px; color:var(--text-light);">Access the TMO Officer dashboard for vehicle management</div>
+                    </div>
+                    <a href="{% url 'tmo:dashboard' %}" class="btn btn-primary btn-sm">Go to TMO</a>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:14px 18px; background:var(--off-white); border:1px solid var(--border); border-radius:6px;">
+                    <div>
+                        <div style="font-weight:600; font-size:14px;">TMO Profile</div>
+                        <div style="font-size:12.5px; color:var(--text-light);">View and update your TMO officer profile</div>
+                    </div>
+                    <a href="{% url 'tmo:profile' %}" class="btn btn-outline-primary btn-sm">View Profile</a>
+                </div>
+                {% endif %}
 
-            <div class="action-card">
-                <div class="icon">Admin icon</div>
-                <h3>Admin Panel</h3>
-                <p>Manage system settings and configurations</p>
-                <a href="/admin/" class="btn">Open Admin Panel</a>
-            </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:14px 18px; background:var(--off-white); border:1px solid var(--border); border-radius:6px;">
+                    <div>
+                        <div style="font-weight:600; font-size:14px;">Admin Panel</div>
+                        <div style="font-size:12.5px; color:var(--text-light);">Manage system settings and configurations</div>
+                    </div>
+                    <a href="/admin/" class="btn btn-outline-primary btn-sm">Open Admin</a>
+                </div>
 
-            <div class="action-card">
-                <div class="icon">Profile icon</div>
-                <h3>Profile Settings</h3>
-                <p>Update your profile information and preferences</p>
-                <a href="#" class="btn">Edit Profile</a>
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:14px 18px; background:var(--off-white); border:1px solid var(--border); border-radius:6px;">
+                    <div>
+                        <div style="font-weight:600; font-size:14px;">Verify Certificate</div>
+                        <div style="font-size:12.5px; color:var(--text-light);">Verify a vehicle registration certificate online</div>
+                    </div>
+                    <a href="{% url 'users:verify_certificate_online' %}" class="btn btn-outline-primary btn-sm">Verify</a>
+                </div>
+
             </div>
         </div>
     </div>
-</body>
-</html>
+
+</div>
+{% endblock %}

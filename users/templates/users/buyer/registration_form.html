@@ -1,259 +1,125 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "users/base_public.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buyer Registration</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+{% block title %}Buyer Registration{% endblock %}
 
-        body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-        }
-
-        h1 {
-            margin-bottom: 10px;
-            color: #333;
-        }
-
-        .subtitle {
-            margin-bottom: 30px;
-            color: #666;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 6px;
-            color: #333;
-            font-weight: bold;
-        }
-
-        input[type="text"],
-        input[type="email"],
-        input[type="password"],
-        input[type="date"],
-        textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-
-        input[type="file"] {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-
-        textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-
-        .btn {
-            background-color: #667eea;
-            color: white;
-            padding: 12px 30px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            width: 100%;
-        }
-
-        .btn:hover {
-            background-color: #5568d3;
-        }
-
-        .error {
-            color: red;
-            background: #fee;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
-
-        .login-link {
-            margin-top: 20px;
-            text-align: center;
-            color: #666;
-        }
-
-        .login-link a {
-            color: #667eea;
-            text-decoration: none;
-        }
-
-        .required {
-            color: red;
-        }
-    </style>
-</head>
-
-<body>
-    <div class="container">
-        <h1>Buyer Registration</h1>
-        <p class="subtitle">Register as a buyer to manage your vehicle registration</p>
+{% block content %}
+<div class="public-card" style="max-width:680px; margin: 40px auto;">
+    <div class="public-card-header">
+        <h2>Buyer Registration</h2>
+        <p>Register as a buyer to manage your vehicle registration</p>
+    </div>
+    <div class="public-card-body">
 
         {% if messages %}
-        {% for message in messages %}
-        <div class="error">{{ message }}</div>
-        {% endfor %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
         {% endif %}
 
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
 
-            <!-- Full Name -->
-            <div class="form-group">
-                <label for="{{ form.full_name.id_for_label }}">{{ form.full_name.label }} <span
-                        class="required">*</span></label>
-                {{ form.full_name }}
-                {% if form.full_name.errors %}
-                <div class="error">{{ form.full_name.errors }}</div>
-                {% endif %}
+            <!-- Personal Info -->
+            <div class="form-section">
+                <h3>Personal Information</h3>
+
+                <div class="form-group">
+                    <label class="form-label">Full Name <span class="req">*</span></label>
+                    {{ form.full_name }}
+                    {% if form.full_name.errors %}<ul class="error-list">{% for e in form.full_name.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Address <span class="req">*</span></label>
+                    {{ form.address }}
+                    {% if form.address.errors %}<ul class="error-list">{% for e in form.address.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                    <div class="form-group">
+                        <label class="form-label">Phone Number <span class="req">*</span></label>
+                        {{ form.phone }}
+                        <div class="form-hint">10 digits only</div>
+                        {% if form.phone.errors %}<ul class="error-list">{% for e in form.phone.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Date of Birth <span class="req">*</span></label>
+                        {{ form.dob }}
+                        {% if form.dob.errors %}<ul class="error-list">{% for e in form.dob.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                    </div>
+                </div>
             </div>
 
-            <!-- Address -->
-            <div class="form-group">
-                <label for="{{ form.address.id_for_label }}">{{ form.address.label }} <span
-                        class="required">*</span></label>
-                {{ form.address }}
-                {% if form.address.errors %}
-                <div class="error">{{ form.address.errors }}</div>
-                {% endif %}
+            <!-- Documents -->
+            <div class="form-section">
+                <h3>Required Documents</h3>
+
+                <div class="form-group">
+                    <label class="form-label">Citizenship Document <span class="req">*</span></label>
+                    {% if request.session.file_names.citizenship_file %}
+                    <div style="padding:8px 12px; background:var(--success-bg); border-radius:5px; font-size:13px; color:var(--success); margin-bottom:8px;">
+                        Previously uploaded: {{ request.session.file_names.citizenship_file }}
+                    </div>
+                    {% endif %}
+                    {{ form.citizenship_file }}
+                    {% if form.citizenship_file.errors %}<ul class="error-list">{% for e in form.citizenship_file.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">NID Document <span class="req">*</span></label>
+                    {% if request.session.file_names.nid_file %}
+                    <div style="padding:8px 12px; background:var(--success-bg); border-radius:5px; font-size:13px; color:var(--success); margin-bottom:8px;">
+                        Previously uploaded: {{ request.session.file_names.nid_file }}
+                    </div>
+                    {% endif %}
+                    {{ form.nid_file }}
+                    {% if form.nid_file.errors %}<ul class="error-list">{% for e in form.nid_file.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                    <div class="form-group">
+                        <label class="form-label">Passport Size Photo <span class="req">*</span></label>
+                        {% if request.session.file_names.passport_photo %}
+                        <div style="padding:8px 12px; background:var(--success-bg); border-radius:5px; font-size:13px; color:var(--success); margin-bottom:8px;">
+                            ✓ {{ request.session.file_names.passport_photo }}
+                        </div>
+                        {% endif %}
+                        {{ form.passport_photo }}
+                        {% if form.passport_photo.errors %}<ul class="error-list">{% for e in form.passport_photo.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Signature <span class="req">*</span></label>
+                        {% if request.session.file_names.signature_image %}
+                        <div style="padding:8px 12px; background:var(--success-bg); border-radius:5px; font-size:13px; color:var(--success); margin-bottom:8px;">
+                            ✓ {{ request.session.file_names.signature_image }}
+                        </div>
+                        {% endif %}
+                        {{ form.signature_image }}
+                        {% if form.signature_image.errors %}<ul class="error-list">{% for e in form.signature_image.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                    </div>
+                </div>
             </div>
 
-            <!-- Phone -->
-            <div class="form-group">
-                <label for="{{ form.phone.id_for_label }}">{{ form.phone.label }} <span
-                        class="required">*</span></label>
-                {{ form.phone }}
-                {% if form.phone.errors %}
-                <div class="error">{{ form.phone.errors }}</div>
-                {% endif %}
-            </div>
-
-            <!-- DOB -->
-            <div class="form-group">
-                <label for="{{ form.dob.id_for_label }}">{{ form.dob.label }} <span class="required">*</span></label>
-                {{ form.dob }}
-                {% if form.dob.errors %}
-                <div class="error">{{ form.dob.errors }}</div>
-                {% endif %}
-            </div>
-
-            <!-- Citizenship File -->
-            <div class="form-group">
-                <label for="{{ form.citizenship_file.id_for_label }}">{{ form.citizenship_file.label }} <span
-                        class="required">*</span></label>
-
-                {% if request.session.file_names.citizenship_file %}
-                <p>Previously uploaded: {{ request.session.file_names.citizenship_file }}</p>
-                <img src="{{ MEDIA_URL }}{{ request.session.temp_files.citizenship_file }}" alt="Citizenship File"
-                    width="100">
-                {% endif %}
-
-                {{ form.citizenship_file }}
-                {% if form.citizenship_file.errors %}
-                <div class="error">{{ form.citizenship_file.errors }}</div>
-                {% endif %}
-            </div>
-
-            <!-- NID File -->
-            <div class="form-group">
-                <label for="{{ form.nid_file.id_for_label }}">{{ form.nid_file.label }} <span
-                        class="required">*</span></label>
-
-                {% if request.session.file_names.nid_file %}
-                <p>Previously uploaded: {{ request.session.file_names.nid_file }}</p>
-                <img src="{{ MEDIA_URL }}{{ request.session.temp_files.nid_file }}" alt="NID File" width="100">
-                {% endif %}
-
-                {{ form.nid_file }}
-                {% if form.nid_file.errors %}
-                <div class="error">{{ form.nid_file.errors }}</div>
-                {% endif %}
-            </div>
-
-            <!-- Passport Photo -->
-            <div class="form-group">
-                <label for="{{ form.passport_photo.id_for_label }}">{{ form.passport_photo.label }} <span
-                        class="required">*</span></label>
-
-                {% if request.session.file_names.passport_photo %}
-                <p>Previously uploaded: {{ request.session.file_names.passport_photo }}</p>
-                <img src="{{ MEDIA_URL }}{{ request.session.temp_files.passport_photo }}" alt="Passport Photo"
-                    width="100">
-                {% endif %}
-
-                {{ form.passport_photo }}
-                {% if form.passport_photo.errors %}
-                <div class="error">{{ form.passport_photo.errors }}</div>
-                {% endif %}
-            </div>
-
-            <!-- Signature Image -->
-            <div class="form-group">
-                <label for="{{ form.signature_image.id_for_label }}">{{ form.signature_image.label }} <span
-                        class="required">*</span></label>
-
-                {% if request.session.file_names.signature_image %}
-                <p>Previously uploaded: {{ request.session.file_names.signature_image }}</p>
-                <img src="{{ MEDIA_URL }}{{ request.session.temp_files.signature_image }}" alt="Signature" width="100">
-                {% endif %}
-
-                {{ form.signature_image }}
-                {% if form.signature_image.errors %}
-                <div class="error">{{ form.signature_image.errors }}</div>
-                {% endif %}
-            </div>
-
-            <!-- Email -->
-            <div class="form-group">
-                <label for="{{ form.email.id_for_label }}">{{ form.email.label }} <span
-                        class="required">*</span></label>
-                {{ form.email }}
-                {% if form.email.errors %}
-                <div class="error">{{ form.email.errors }}</div>
-                {% endif %}
+            <!-- Account -->
+            <div class="form-section">
+                <h3>Account Information</h3>
+                <div class="form-group">
+                    <label class="form-label">Email Address <span class="req">*</span></label>
+                    {{ form.email }}
+                    {% if form.email.errors %}<ul class="error-list">{% for e in form.email.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                </div>
             </div>
 
             {% if form.non_field_errors %}
-            <div class="error">{{ form.non_field_errors }}</div>
+            <div class="alert alert-error">{{ form.non_field_errors }}</div>
             {% endif %}
 
-            <button type="submit" class="btn">Continue to Preview</button>
-
+            <button type="submit" class="btn btn-primary btn-block">Continue to Preview</button>
         </form>
 
-
-        <div class="login-link">
-            Already have an account? <a href="{% url 'users:all_login' %}">Login here</a>
+        <div style="text-align:center; margin-top:16px; font-size:13.5px; color:var(--text-light);">
+            Already have an account? <a href="{% url 'users:all_login' %}" style="color:var(--gov-blue); font-weight:600; text-decoration:none;">Login here</a>
         </div>
     </div>
-
-</html>
+</div>
+{% endblock %}

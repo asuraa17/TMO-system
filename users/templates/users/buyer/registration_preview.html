@@ -1,215 +1,108 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <style>
-        *{
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-        }
-        h1 {
-            color: #333;
-            margin-bottom: 10px;
-        }
-        .subtitle {
-            color: #666;
-            margin-bottom: 30px;
-        }
-        .preview-section {
-            margin-bottom: 20px;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 5px;
-        }
-        .preview-section h3 {
-            color: #333;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #667eea;
-        }
-        .preview-label {
-            font-weight: bold;
-            color: #555;
-            margin-bottom: 5px;
-        }
-        .preview-value {
-            color: #333;
-            margin-bottom: 15px;
-        }
-        .file-info {
-            color: #667eea;
-            font-style: italic;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
+{% extends "users/base_public.html" %}
 
-        label {
-            display: block;
-            margin-bottom: 6px;
-            color: #333;
-            font-weight: bold;
-        }
-        input[type="password"]
-        {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-        .required {
-            color: red;
-        }
-        .error {
-            color: red;
-            background: #fee;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
-        .button-group {
-            display: flex;
-            gap: 10px;
-            margin-top: 30px;
-        }
-        .btn {
-            padding: 12px 30px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            flex: 1;
-            text-decoration: none;
-            text-align: center;
-            display: inline-block;
-        }
-        .btn-primary {
-            background: #667eea;
-            color: white;
-        }
-        .btn-primary:hover {
-            background: #5568d3;
-        }
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-        }
-        .btn-secondary:hover {
-            background: #5a6268;
-        }
-        .warning {
-            background: #fff3cd;
-            border: 1px solid #ffc107;
-            color: #856404;
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Preview your registration</h1>
-        <p class="subtitle">Please review your information before submitting</p>
+{% block title %}Preview Registration{% endblock %}
 
-        <div class="warning">Please review all information carefully. Once submitted, you will need to contact support to make changes</div>
+{% block content %}
+<div class="public-card" style="max-width:680px; margin:40px auto;">
+    <div class="public-card-header">
+        <h2>Preview Registration</h2>
+        <p>Please review your information carefully before submitting</p>
+    </div>
+    <div class="public-card-body">
+
+        <div class="alert alert-warning">
+            Please review all information carefully. Once submitted, you will need to contact support to make changes.
+        </div>
 
         {% if messages %}
             {% for message in messages %}
-                <div class="error">{{ message }}</div>
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
             {% endfor %}
         {% endif %}
 
         {% if error %}
-            <div class="error">{{ error }}</div>
+        <div class="alert alert-error">{{ error }}</div>
         {% endif %}
 
+        <!-- Personal Info -->
         <div class="preview-section">
             <h3>Personal Information</h3>
-            <div class="preview-label">Full Name:</div>
-            <div class="preview-value">{{ data.full_name }}</div>
-
-            <div class="preview-label">Address:</div>
-            <div class="preview-value">{{ data.address }}</div>
-
-            <div class="preview-label">Phone:</div>
-            <div class="preview-value">{{ data.phone }}</div>
-
-            <div class="preview-label">Date of Birth:</div>
-            <div class="preview-value">{{ data.dob }}</div>
-
+            <div class="preview-row">
+                <span class="preview-label">Full Name</span>
+                <span class="preview-value">{{ data.full_name }}</span>
+            </div>
+            <div class="preview-row">
+                <span class="preview-label">Address</span>
+                <span class="preview-value">{{ data.address }}</span>
+            </div>
+            <div class="preview-row">
+                <span class="preview-label">Phone</span>
+                <span class="preview-value">{{ data.phone }}</span>
+            </div>
+            <div class="preview-row">
+                <span class="preview-label">Date of Birth</span>
+                <span class="preview-value">{{ data.dob }}</span>
+            </div>
         </div>
 
+        <!-- Account -->
         <div class="preview-section">
             <h3>Account Information</h3>
-            <div class="preview-label">Email:</div>
-            <div class="preview-value">{{ data.email }}</div>
+            <div class="preview-row">
+                <span class="preview-label">Email</span>
+                <span class="preview-value">{{ data.email }}</span>
+            </div>
         </div>
 
+        <!-- Documents -->
         <div class="preview-section">
             <h3>Uploaded Documents</h3>
-
             {% if files.citizenship_file %}
-            <div class="preview-label">Citizenship Document:</div>
-            <div class="preview-value">{{ files.citizenship_file }}</div>
+            <div class="preview-row">
+                <span class="preview-label">Citizenship Document</span>
+                <span class="preview-value" style="color:var(--success);">✓ {{ files.citizenship_file }}</span>
+            </div>
             {% endif %}
-
             {% if files.nid_file %}
-            <div class="preview-label">National ID:</div>
-            <div class="preview-value">{{ files.nid_file }}</div>
+            <div class="preview-row">
+                <span class="preview-label">NID Document</span>
+                <span class="preview-value" style="color:var(--success);">{{ files.nid_file }}</span>
+            </div>
             {% endif %}
-
             {% if files.passport_photo %}
-            <div class="preview-label">Passport Photo:</div>
-            <div class="preview-value">{{ files.passport_photo }}</div>
+            <div class="preview-row">
+                <span class="preview-label">Passport Photo</span>
+                <span class="preview-value" style="color:var(--success);">{{ files.passport_photo }}</span>
+            </div>
             {% endif %}
-
             {% if files.signature_image %}
-            <div class="preview-label">Signature:</div>
-            <div class="preview-value">{{ files.signature_image }}</div>
+            <div class="preview-row">
+                <span class="preview-label">Signature</span>
+                <span class="preview-value" style="color:var(--success);">{{ files.signature_image }}</span>
+            </div>
             {% endif %}
         </div>
 
+        <!-- Password + Submit -->
         <form method="post" action="{% url 'users:buyer_register_submit' %}">
             {% csrf_token %}
-            
-            <div class="form-group">
-                <label for="password">Password
-                    <span class="required">*</span>
-                </label>
-                <input type="password" name="password" id="password" placeholder="Enter your password" class="form-control" style="width: 100%; padding: 10px; margin-top: 5px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px;" required>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px;">
+                <div class="form-group" style="margin:0;">
+                    <label class="form-label">Password <span class="req">*</span></label>
+                    <input type="password" name="password" class="form-control" placeholder="Enter password" required>
+                </div>
+                <div class="form-group" style="margin:0;">
+                    <label class="form-label">Confirm Password <span class="req">*</span></label>
+                    <input type="password" name="confirm_password" class="form-control" placeholder="Re-enter password" required>
+                </div>
             </div>
 
-            <div class="form-group">
-                <label for="confirm_password">Confirm password
-                    <span class="required">*</span>        
-                </label>
-                <input type="password" name="confirm_password" id="confirm_password" placeholder="Re-enter your password" class="form-control" style="width: 100%; padding: 10px; margin-top: 5px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px;" required>
-            </div>
-
-            <div class="button-group">
-                <a href="{% url 'users:buyer_register' %}" class="btn btn-secondary">Back to Edit</a>
-                <button type="submit" class="btn btn-primary" style="width: 100%;">Confirm and Register</button>        
+            <div style="display:flex; gap:12px;">
+                <a href="{% url 'users:buyer_register' %}" class="btn btn-secondary" style="flex:1;">Back to Edit</a>
+                <button type="submit" class="btn btn-primary" style="flex:2;">✓ Confirm & Register</button>
             </div>
         </form>
     </div>
-</body>
-</html>
+</div>
+{% endblock %}

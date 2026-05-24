@@ -1,330 +1,80 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Vehicles</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f6f9;
-        }
-        .navbar {
-            background-color: #667eea;
-            color: white;
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-        .navbar h1 {
-            font-size: 24px;
-        }
-        .nav-links {
-            display: flex;
-            gap: 15px;
-        }
-        .nav-links a {
-            color: white;
-            text-decoration: none;
-            padding: 8px 20px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 5px;
-        }
-        .nav-links a:hover {
-            background: rgba(255, 255, 255, 0.4);
-        }
-        .container {
-            max-width: 1200px;
-            margin: 40px auto;
-            padding: 0 20px;
-        }
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        .stat-card {
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            border-left: 4px solid #667eea;
-        }
-        .stat-card h3 {
-            color: #666;
-            font-size: 14px;
-            margin-bottom: 10px;
-        }
-        .stat-card .number {
-            font-size: 36px;
-            font-weight: bold;
-            color: #333;
-        }
-        .vehicles-card {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            overflow: hidden;
-            margin-bottom: 20px;
-        }
-        .vehicles-card h2 {
-            padding: 20px;
-            border-bottom: 1px solid #eee;
-            color: #333;
-        }
-        .vehicles-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 20px;
-            padding: 20px;
-        }
-        .vehicle-card {
-            background: #f8f9fa;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            transition: transform 0.2s;
-        }
-        .vehicle-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-        }
-        .vehicle-image {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-        }
-        .vehicle-content {
-            padding: 20px;
-        }
-        .vehicle-title {
-            font-size: 20px;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 10px;
-        }
-        .vehicle-info {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        .info-item {
-            display: flex;
-            flex-direction: column;
-        }
-        .info-label {
-            font-size: 12px;
-            color: #666;
-            margin-bottom: 3px;
-        }
-        .info-value {
-            font-size: 14px;
-            color: #333;
-            font-weight: bold;
-        }
-        .status-badge {
-            display: inline-block;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-            margin-bottom: 15px;
-        }
-        .status-verified {
-            background: #d4edda;
-            color: #155724;
-        }
-        .status-pending {
-            background: #fff3cd;
-            color: #856404;
-        }
-        .status-rejected {
-            background: #f8d7da;
-            color: #721c24;
-        }
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-            text-decoration: none;
-            display: inline-block;
-            width: 100%;
-            text-align: center;
-        }
-        .btn-primary {
-            background: #667eea;
-            color: white;
-        }
-        .btn-primary:hover {
-            background: #5568d3;
-        }
-        .no-vehicles {
-            text-align: center;
-            padding: 60px 20px;
-        }
-        .no-vehicles-icon {
-            font-size: 80px;
-            margin-bottom: 20px;
-            opacity: 0.3;
-        }
-        .no-vehicles h3 {
-            color: #666;
-            margin-bottom: 10px;
-        }
-        .no-vehicles p {
-            color: #999;
-            margin-bottom: 20px;
-        }
-        .alert {
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        .alert-warning {
-            background: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeeba;
-        }
-        .action-buttons {
-            margin-top: 10px;
-            display: flex;
-            gap: 10px;
-        }
+{% extends "users/base.html" %}
+{% block title %}My Vehicles{% endblock %}
+{% block header_right %}<div class="header-right"><div class="user-badge">Buyer: <span>{{ buyer_profile.full_name }}</span></div></div>{% endblock %}
+{% block nav_links %}
+<li><a href="{% url 'users:buyer_home' %}">Home</a></li>
+<li><a href="{% url 'users:buyer_vehicles' %}" class="active">My Vehicles</a></li>
+{% endblock %}
+{% block nav_right %}
+<li><a href="{% url 'users:buyer_profile_update' %}">Profile</a></li>
+<li class="nav-divider"></li>
+<li><a href="{% url 'users:all_logout' %}" class="nav-danger">Logout</a></li>
+{% endblock %}
+{% block content %}
+<div class="page-wrapper">
+    {% if messages %}{% for message in messages %}<div class="alert alert-{{ message.tags }}">{{ message }}</div>{% endfor %}{% endif %}
+    <div class="page-header">
+        <div><h1>My Vehicles</h1><p>View and manage all your registered vehicles</p></div>
+    </div>
 
-        .btn-success {
-            background: #28a745;
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #218838;
-        }
-
-        .btn-disabled {
-            background: #ccc;
-            color: #666;
-            cursor: not-allowed;
-            pointer-events: none;
-        }
-    </style>
-</head>
-<body>
-    <div class="navbar">
-        <h1>My Vehicles</h1>
-        <div class="nav-links">
-            <a href="{% url 'users:buyer_home' %}">Back to Home</a>
-            <a href="{% url 'users:all_logout' %}">Logout</a>
+    <!-- Stats -->
+    <div class="stats-grid" style="grid-template-columns:repeat(3,1fr); margin-bottom:24px;">
+        <div class="stat-card primary">
+            <h3>Total Vehicles</h3>
+            <div class="number">{{ total_vehicles }}</div>
+        </div>
+        <div class="stat-card success">
+            <h3>Verified</h3>
+            <div class="number">{{ verified_vehicles }}</div>
+        </div>
+        <div class="stat-card warning">
+            <h3>Pending</h3>
+            <div class="number">{{ pending_vehicles }}</div>
         </div>
     </div>
 
-    <div class="container">
-        {% if messages %}
-            {% for message in messages %}
-            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-
-        <!-- Statistics -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <h3>Total Vehicles</h3>
-                <div class="number">{{ total_vehicles }}</div>
-            </div>
-            <div class="stat-card" style="border-left-color: #28a745;">
-                <h3>Verified Vehicles</h3>
-                <div class="number">{{ verified_vehicles }}</div>
-            </div>
-            <div class="stat-card" style="border-left-color: #ffc107;">
-                <h3>Pending Verification</h3>
-                <div class="number">{{ pending_vehicles }}</div>
-            </div>
-        </div>
-
-        <!-- Vehicles List -->
-        <div class="vehicles-card">
-            <h2>Your Registered Vehicles</h2>
-            
-            {% if vehicles %}
-            <div class="vehicles-grid">
-                {% for vehicle in vehicles %}
-                <div class="vehicle-card">
-                    <img src="{{ vehicle.photo_front.url }}" alt="{{ vehicle.make }} {{ vehicle.model }}" class="vehicle-image">
-                    <div class="vehicle-content">
-                        <div class="vehicle-title">{{ vehicle.make }} {{ vehicle.model }}</div>
-                        
-                        <span class="status-badge status-{{ vehicle.verification_status }}">
-                            {{ vehicle.get_verification_status_display }}
-                        </span>
-                        
-                        <div class="vehicle-info">
-                            <div class="info-item">
-                                <span class="info-label">Year</span>
-                                <span class="info-value">{{ vehicle.year }}</span>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label">Color</span>
-                                <span class="info-value">{{ vehicle.color }}</span>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label">Chassis Number</span>
-                                <span class="info-value">{{ vehicle.chassis_number }}</span>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label">Plate Number</span>
-                                <span class="info-value">
-                                    {% if vehicle.verification_status == 'verified' %}
-                                        {{ vehicle.permanent_plate_number }}
-                                    {% else %}
-                                        {{ vehicle.temporary_plate_number }}
-                                    {% endif %}
-                                </span>
-                            </div>
-                        </div>
-                        
-                        <div class="action-buttons">
-                            <a href="{% url 'users:buyer_vehicle_detail' vehicle.id %}" 
-                            class="btn btn-primary">View Details</a>
-                            
-                            {% if vehicle.verification_status == 'verified' %}
-                                <a href="{% url 'users:download_vehicle_certificate' vehicle.id %}" 
-                                class="btn btn-success">
-                                    📄 Download Certificate
-                                </a>
-                            {% else %}
-                                <button class="btn btn-disabled" disabled 
-                                        title="Certificate only available for verified vehicles">
-                                    🔒 Certificate Locked
-                                </button>
-                            {% endif %}
+    <!-- Vehicle Cards -->
+    <div class="card">
+        <div class="card-header"><h2>Registered Vehicles</h2></div>
+        {% if vehicles %}
+        <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(340px,1fr)); gap:20px; padding:20px;">
+            {% for vehicle in vehicles %}
+            <div style="background:var(--white); border:1px solid var(--border); border-radius:8px; overflow:hidden; box-shadow:var(--shadow-sm);">
+                <img src="{{ vehicle.photo_front.url }}" alt="{{ vehicle.make }} {{ vehicle.model }}"
+                     style="width:100%; height:200px; object-fit:cover;">
+                <div style="padding:18px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                        <h3 style="font-family:'Noto Serif',serif; font-size:17px; font-weight:700;">{{ vehicle.make }} {{ vehicle.model }}</h3>
+                        <span class="badge badge-{{ vehicle.verification_status }}">{{ vehicle.get_verification_status_display }}</span>
+                    </div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px; font-size:13px;">
+                        <div><span style="color:var(--text-light);">Year</span><br><strong>{{ vehicle.year }}</strong></div>
+                        <div><span style="color:var(--text-light);">Color</span><br><strong>{{ vehicle.color }}</strong></div>
+                        <div><span style="color:var(--text-light);">Chassis</span><br><strong style="font-family:monospace; font-size:12px;">{{ vehicle.chassis_number }}</strong></div>
+                        <div><span style="color:var(--text-light);">Plate</span><br>
+                            <strong style="font-family:monospace; font-size:12px;">
+                                {% if vehicle.verification_status == 'verified' %}{{ vehicle.permanent_plate_number }}{% else %}{{ vehicle.temporary_plate_number }}{% endif %}
+                            </strong>
                         </div>
                     </div>
+                    <div style="display:flex; gap:8px; justify-content:center;">
+                        <a href="{% url 'users:buyer_vehicle_detail' vehicle.id %}" class="btn btn-primary btn-sm">View Details</a>
+                        {% if vehicle.verification_status == 'verified' %}
+                        <a href="{% url 'users:download_vehicle_certificate' vehicle.id %}" class="btn btn-success btn-sm">Certificate</a>
+                        {% else %}
+                        <button class="btn btn-sm btn-disabled">Locked</button>
+                        {% endif %}
+                    </div>
                 </div>
-                {% endfor %}
             </div>
-            {% else %}
-            <div class="no-vehicles">
-                <div class="no-vehicles-icon">🚗</div>
-                <h3>No Vehicles Yet</h3>
-                <p>You don't have any registered vehicles. Visit a verified showroom to purchase and register your vehicle.</p>
-            </div>
-            {% endif %}
+            {% endfor %}
         </div>
+        {% else %}
+        <div class="no-data">
+            <h3 style="margin-bottom:8px;">No Vehicles Yet</h3>
+            <p>You don't have any registered vehicles. Visit a verified showroom to purchase and register your vehicle.</p>
+        </div>
+        {% endif %}
     </div>
-</body>
-</html>
+</div>
+{% endblock %}
